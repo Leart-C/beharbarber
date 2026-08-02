@@ -1,25 +1,27 @@
 import { useClerk } from "@clerk/expo";
-import { Button, StyleSheet, Text, View } from "react-native";
+import { Button, Text, View } from "react-native";
+
+import { SafeAreaScreen } from "@/components/layout/safe-area-screen";
 
 export default function HomeScreen() {
-  const {signOut} = useClerk();
-  return (
-    <View style={styles.container}>
-      <Text>Home screen</Text>
+  const { signOut } = useClerk();
 
-      <Button
-        title="Sign out"
-        onPress={()=>signOut()}
-      />
-    </View>
+  return (
+    <SafeAreaScreen>
+      <View className="flex-1 items-center justify-center gap-4">
+        <Text className="font-inter-bold text-2xl text-foreground">
+          Home screen
+        </Text>
+
+        <Text className="font-inter-medium text-foreground-secondary">
+          Theme test
+        </Text>
+
+        <Button
+          title="Sign out"
+          onPress={() => signOut()}
+        />
+      </View>
+    </SafeAreaScreen>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 16,
-  },
-});
