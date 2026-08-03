@@ -19,6 +19,8 @@ import { styles } from "./home-screen.styles";
 import { ServiceCategorySelector } from "@/features/services/components/service-category-selector";
 import { serviceCategories } from "@/features/services/data/service-categories";
 import type { ServiceCategoryId } from "@/features/services/types/service-category";
+import { ServiceCard } from "@/features/services/components/service-card";
+import { servicesPreview } from "@/features/services/data/services-preview";
 
 export function HomeScreen() {
   const [language, setLanguage] =
@@ -79,6 +81,13 @@ export function HomeScreen() {
             categories={serviceCategories}
             selectedCategoryId={selectedCategoryId}
             onSelectCategory={setSelectedCategoryId}
+          />
+
+          <ServiceCard
+            service={servicesPreview[0]}
+            onAdd={(service)=>{
+              Alert.alert("Sherbimi u zgjodh", service.name);
+            }}
           />
         </View>
       </ScrollView>

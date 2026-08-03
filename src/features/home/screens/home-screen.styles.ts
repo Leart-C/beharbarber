@@ -9,4 +9,7 @@ export const styles = StyleSheet.create({
     paddingBottom: 120,
     gap: spacing.lg,
   },
+  servicePreview: {
+    marginTop: spacing.lg,
+  },
 });
