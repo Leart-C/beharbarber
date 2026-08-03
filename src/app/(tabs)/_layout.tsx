@@ -19,7 +19,7 @@ export default function TabsLayout(){
 
   return (
     <NativeTabs tintColor={brandColors.blue}>
-      <NativeTabs.Trigger name="index">
+      <NativeTabs.Trigger name="index" disableAutomaticContentInsets>
 
         <NativeTabs.Trigger.Icon
           sf={{

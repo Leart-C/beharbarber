@@ -48,7 +48,7 @@ export function HomeHeader({
       >
         <View style={styles.greetingContainer}>
           <Text style={styles.greeting}>
-            Pershendetje,
+            Përshëndetje,
           </Text>
 
           <Text
@@ -59,7 +59,11 @@ export function HomeHeader({
           </Text>
         </View>
 
-        {rightAccessory}
+        {rightAccessory ? (
+          <View style={styles.accessoryContainer}>
+            {rightAccessory}
+          </View>
+        ) : null}
       </View>
     </View>
   );

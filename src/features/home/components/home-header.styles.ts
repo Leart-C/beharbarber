@@ -17,6 +17,11 @@ export const styles = StyleSheet.create({
     backgroundColor: brandColors.navy,
   },
 
+  accessoryContainer: {
+    flexShrink: 0,
+    marginTop: 2,
+  },
+
   backgroundImage: {
     ...StyleSheet.absoluteFill,
   },
@@ -32,6 +37,9 @@ export const styles = StyleSheet.create({
 
     paddingHorizontal: spacing.xl,
     paddingBottom: spacing.xl,
+
+    width: "100%",
+    gap: spacing.lg,
   },
 
   greetingContainer: {
