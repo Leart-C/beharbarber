@@ -16,6 +16,9 @@ import {
   LanguageToggle,
 } from "../components/language-toggle";
 import { styles } from "./home-screen.styles";
+import { ServiceCategorySelector } from "@/features/services/components/service-category-selector";
+import { serviceCategories } from "@/features/services/data/service-categories";
+import type { ServiceCategoryId } from "@/features/services/types/service-category";
 
 export function HomeScreen() {
   const [language, setLanguage] =
@@ -23,6 +26,8 @@ export function HomeScreen() {
 
   const [isAlertVisible, setIsAlertVisible] =
     useState(true);
+
+  const [selectedCategoryId,setSelectedCategoryId] = useState<ServiceCategoryId>("haircut");
 
   const handleEditAppointment = () => {
     Alert.alert(
@@ -68,6 +73,12 @@ export function HomeScreen() {
             appointment={appointmentPreview}
             onEdit={handleEditAppointment}
             onCancel={handleCancelAppointment}
+          />
+
+          <ServiceCategorySelector
+            categories={serviceCategories}
+            selectedCategoryId={selectedCategoryId}
+            onSelectCategory={setSelectedCategoryId}
           />
         </View>
       </ScrollView>
