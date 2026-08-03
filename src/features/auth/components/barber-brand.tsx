@@ -10,13 +10,12 @@ export function BarberBrand() {
       </Text>
 
       <Text style={styles.title}>
-        Behar
+        BEHAR
       </Text>
 
       <View style={styles.marks}>
         <View style={[styles.mark, styles.blueMark]} />
         <View style={[styles.mark, styles.redMark]} />
-        <View style={[styles.mark, styles.grayMark]} />
       </View>
 
       <Text style={styles.description}>

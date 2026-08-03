@@ -19,7 +19,7 @@ export const styles = StyleSheet.create({
   title: {
     color: brandColors.white,
     fontFamily: fontFamily.extraBold,
-    fontSize: 68,
+    fontSize: 60,
     lineHeight: 72,
     letterSpacing: -3,
   },

@@ -6,10 +6,27 @@ import { radius, spacing } from "@/theme/spacing";
 
 export const styles = StyleSheet.create({
   button: {
-    minHeight: 60,
+    width: "100%",
+    minHeight: 64,
+    overflow: "hidden",
+
     borderRadius: radius.lg,
-    paddingHorizontal: spacing.xl,
     backgroundColor: brandColors.blue,
+
+    shadowColor: "#000000",
+    shadowOffset: {
+      width: 0,
+      height: 8,
+    },
+    shadowOpacity: 0.18,
+    shadowRadius: 14,
+
+    elevation: 6,
+  },
+
+  content: {
+    minHeight: 64,
+    paddingHorizontal: spacing.xl,
 
     flexDirection: "row",
     alignItems: "center",
@@ -19,7 +36,7 @@ export const styles = StyleSheet.create({
 
   pressed: {
     backgroundColor: brandColors.bluePressed,
-    transform: [{ scale: 0.99 }],
+    transform: [{ scale: 0.985 }],
   },
 
   disabled: {
@@ -27,8 +44,8 @@ export const styles = StyleSheet.create({
   },
 
   googleIconContainer: {
-    width: 30,
-    height: 30,
+    width: 32,
+    height: 32,
     borderRadius: radius.pill,
 
     alignItems: "center",
@@ -41,7 +58,7 @@ export const styles = StyleSheet.create({
     color: "#4285F4",
     fontFamily: fontFamily.bold,
     fontSize: 17,
-    lineHeight: 20,
+    lineHeight: 21,
   },
 
   label: {

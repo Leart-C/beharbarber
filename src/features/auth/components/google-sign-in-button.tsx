@@ -38,19 +38,23 @@ export function GoogleSignInButton({
         isDisabled && styles.disabled,
       ]}
     >
-      {isLoading ? (
-        <ActivityIndicator color={brandColors.white} />
-      ) : (
-        <>
-          <View style={styles.googleIconContainer}>
-            <Text style={styles.googleIconText}>G</Text>
-          </View>
+      <View style={styles.content}>
+        {isLoading ? (
+          <ActivityIndicator color={brandColors.white} />
+        ) : (
+          <>
+            <View style={styles.googleIconContainer}>
+              <Text style={styles.googleIconText}>
+                G
+              </Text>
+            </View>
 
-          <Text style={styles.label}>
-            Vazhdo me Google
-          </Text>
-        </>
-      )}
+            <Text style={styles.label}>
+              Vazhdo me Google
+            </Text>
+          </>
+        )}
+      </View>
     </Pressable>
   );
 }
