@@ -12,4 +12,8 @@ export const styles = StyleSheet.create({
   servicePreview: {
     marginTop: spacing.lg,
   },
+  servicesList: {
+    marginTop: spacing.xl,
+    paddingBottom: spacing.xl,
+  },
 });

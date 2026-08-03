@@ -21,6 +21,7 @@ import { serviceCategories } from "@/features/services/data/service-categories";
 import type { ServiceCategoryId } from "@/features/services/types/service-category";
 import { ServiceCard } from "@/features/services/components/service-card";
 import { servicesPreview } from "@/features/services/data/services-preview";
+import { ServiceList } from "@/features/services/components/service-list";
 
 export function HomeScreen() {
   const [language, setLanguage] =
@@ -30,6 +31,14 @@ export function HomeScreen() {
     useState(true);
 
   const [selectedCategoryId,setSelectedCategoryId] = useState<ServiceCategoryId>("haircut");
+
+  const selectedCategory = serviceCategories.find(
+    (category) => category.id === selectedCategoryId,
+  );
+
+  const filteredServices = servicesPreview.filter(
+    (service) => service.categoryId === selectedCategoryId,
+  );
 
   const handleEditAppointment = () => {
     Alert.alert(
@@ -83,12 +92,16 @@ export function HomeScreen() {
             onSelectCategory={setSelectedCategoryId}
           />
 
-          <ServiceCard
-            service={servicesPreview[0]}
-            onAdd={(service)=>{
-              Alert.alert("Sherbimi u zgjodh", service.name);
-            }}
-          />
+          <View style={styles.servicesList}>
+            <ServiceList
+              title={selectedCategory?.label ?? "Shërbimet"}
+              symbol={selectedCategory?.symbol ?? ""}
+              services={filteredServices}
+              onAddService={(service) => {
+                Alert.alert("Shërbimi u zgjodh", service.name);
+              }}
+            />
+          </View>
         </View>
       </ScrollView>
     </SafeAreaScreen>

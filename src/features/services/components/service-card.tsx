@@ -5,14 +5,15 @@ import { styles } from "./service-card.styles";
 
 type ServiceCardProps = {
   service: BarberService;
+  symbol: string;
   onAdd: (service: BarberService) => void;
 };
 
-export function ServiceCard({service,onAdd}:ServiceCardProps){
+export function ServiceCard({service,symbol,onAdd}:ServiceCardProps){
     return(
         <View style={styles.container}>
             <View style={styles.iconContainer}>
-                <Text style={styles.icon}>✂</Text>
+                <Text style={styles.icon}>{symbol}</Text>
             </View>
 
             <View style={styles.information}>
