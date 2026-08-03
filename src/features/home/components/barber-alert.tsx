@@ -40,7 +40,7 @@ export function BarberAlert({
                         pressed && styles.dismissButtonPressed,
                     ]}
                 >
-                    <Text style={styles.dismissIcon}>x</Text>
+                    <Text style={styles.dismissIcon}>×</Text>
                 </Pressable>
             ): null}
         </View>

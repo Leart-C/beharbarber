@@ -32,7 +32,7 @@ export function UpcomingAppointmentCard({appointment,onEdit,onCancel}:UpcomingAp
 
     const dateLabel = capitalize(
         new Intl.DateTimeFormat("sq-AL", {
-        weekday: "short",
+        weekday: "long",
         day: "numeric",
         month: "long",
         }).format(startsAt),
@@ -69,33 +69,31 @@ export function UpcomingAppointmentCard({appointment,onEdit,onCancel}:UpcomingAp
             </View>
 
         <View style={styles.actions}>
-            <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Ndrysho terminin"
-            onPress={onEdit}
-            style={({ pressed }) => [
+        <Pressable onPress={onEdit} style={styles.actionPressable}>
+            {({ pressed }) => (
+            <View
+                style={[
                 styles.actionButton,
                 pressed && styles.actionButtonPressed,
-            ]}
+                ]}
             >
-            <Text style={styles.actionLabel}>
-                Ndrysho
-            </Text>
-            </Pressable>
+                <Text style={styles.actionText}>Ndrysho</Text>
+            </View>
+            )}
+        </Pressable>
 
-            <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Anulo terminin"
-            onPress={onCancel}
-            style={({ pressed }) => [
+        <Pressable onPress={onCancel} style={styles.actionPressable}>
+            {({ pressed }) => (
+            <View
+                style={[
                 styles.actionButton,
                 pressed && styles.actionButtonPressed,
-            ]}
+                ]}
             >
-            <Text style={styles.actionLabel}>
-                Anulo
-            </Text>
-            </Pressable>
+                <Text style={styles.actionText}>Anulo</Text>
+            </View>
+            )}
+        </Pressable>
         </View>
     </View>
     )

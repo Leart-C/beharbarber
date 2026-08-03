@@ -7,5 +7,6 @@ export const styles = StyleSheet.create({
     marginTop: -28,
     paddingHorizontal: spacing.xl,
     paddingBottom: 120,
+    gap: spacing.lg,
   },
 });

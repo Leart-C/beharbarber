@@ -71,32 +71,35 @@ export const styles = StyleSheet.create({
   },
 
   actions: {
-    marginTop: spacing.xl,
-
     flexDirection: "row",
-    gap: spacing.md,
+    gap: spacing.sm,
+    width: "100%",
+    marginTop: spacing.lg,
   },
 
   actionButton: {
-    flex: 1,
-    minHeight: 48,
-
+    width: "100%",
+    minHeight: 52,
     alignItems: "center",
     justifyContent: "center",
-
-    borderRadius: radius.lg,
-    backgroundColor: "rgba(255,255,255,0.18)",
+    borderRadius: radius.pill,
+    backgroundColor: "rgba(255, 255, 255, 0.22)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.25)",
   },
 
   actionButtonPressed: {
-    backgroundColor: "rgba(255,255,255,0.28)",
-    transform: [{ scale: 0.985 }],
+    opacity: 0.7,
+    transform: [{ scale: 0.98 }],
   },
 
-  actionLabel: {
+  actionText: {
     color: brandColors.white,
-    fontFamily: fontFamily.bold,
-    fontSize: 15,
-    lineHeight: 20,
+    fontFamily: fontFamily.semiBold,
+    fontSize: 16,
+  },
+
+  actionPressable: {
+    flex: 1,
   },
 });
