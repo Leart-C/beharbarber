@@ -64,4 +64,8 @@ export const styles = StyleSheet.create({
     fontFamily: fontFamily.semiBold,
     fontSize: 16,
   },
+
+  selectedService: {
+    marginTop: spacing.xl,
+  },
 });

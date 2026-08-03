@@ -10,39 +10,39 @@ type ServiceCardProps = {
 };
 
 export function ServiceCard({service,symbol,onAdd}:ServiceCardProps){
-    return(
-        <View style={styles.container}>
-            <View style={styles.iconContainer}>
+    return (
+        <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`Zgjidh ${service.name}`}
+            onPress={() => onAdd(service)}
+            style={styles.cardPressable}
+        >
+            {({ pressed }) => (
+            <View
+                style={[
+                styles.container,
+                pressed && styles.cardPressed,
+                ]}
+            >
+                <View style={styles.iconContainer}>
                 <Text style={styles.icon}>{symbol}</Text>
-            </View>
+                </View>
 
-            <View style={styles.information}>
+                <View style={styles.information}>
                 <Text style={styles.name}>{service.name}</Text>
 
                 <Text style={styles.details}>
                     {service.durationMinutes} min
                 </Text>
+                </View>
+
+                <Text style={styles.price}>€{service.price}</Text>
+
+                <View style={styles.addButton}>
+                <Text style={styles.addButtonText}>+</Text>
+                </View>
             </View>
-
-            <Text style={styles.price}>€{service.price}</Text>
-
-            <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={`Shto ${service.name}`}
-                onPress={() => onAdd(service)}
-                style={styles.addPressable}
-            >
-                {({pressed})=>(
-                    <View
-                        style={[
-                            styles.addButton,
-                            pressed && styles.addButtonPressed,
-                        ]}
-                    >
-                        <Text style={styles.addButtonText}>+</Text>
-                    </View>
-                )}
-            </Pressable>
-        </View>
-    )
+            )}
+        </Pressable>
+    );
 }

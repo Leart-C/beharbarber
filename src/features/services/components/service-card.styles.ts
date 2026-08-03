@@ -65,14 +65,9 @@ export const styles = StyleSheet.create({
     lineHeight: 24,
   },
 
-  addPressable: {
+  addButton: {
     width: 46,
     height: 46,
-  },
-
-  addButton: {
-    width: "100%",
-    height: "100%",
     alignItems: "center",
     justifyContent: "center",
 
@@ -82,15 +77,19 @@ export const styles = StyleSheet.create({
     borderColor: "rgba(78, 132, 229, 0.35)",
   },
 
-  addButtonPressed: {
-    opacity: 0.7,
-    transform: [{ scale: 0.92 }],
-  },
-
   addButtonText: {
     color: brandColors.blue,
     fontFamily: fontFamily.bold,
     fontSize: 26,
     lineHeight: 29,
+  },
+
+  cardPressable: {
+    width: "100%",
+  },
+
+  cardPressed: {
+    opacity: 0.75,
+    transform: [{ scale: 0.98 }],
   },
 });

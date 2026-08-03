@@ -4,6 +4,9 @@ import { Pressable, Text, View } from "react-native";
 import { SafeAreaScreen } from "@/components/layout/safe-area-screen";
 import { servicesPreview } from "@/features/services/data/services-preview";
 
+import { SelectedServiceCard } from "../components/selected-service-card";
+import { serviceCategories } from "@/features/services/data/service-categories";
+
 import { styles } from "./booking-screen.styles";
 
 type BookingScreenProps = {
@@ -14,6 +17,10 @@ export function BookingScreen({serviceId}:BookingScreenProps){
     const service = servicesPreview.find(
         (item) => item.id === serviceId,
     );
+
+    const category = service ? serviceCategories.find(
+        (item) => item.id === service.categoryId,
+    ) : undefined;
 
     if(!service){
         return (
@@ -48,11 +55,15 @@ export function BookingScreen({serviceId}:BookingScreenProps){
 
                 <Text style={styles.eyebrow}>REZERVO TERMININ</Text>
 
-                <Text style={styles.title}>{service.name}</Text>
+                <Text style={styles.title}>Zgjidh daten dhe oren</Text>
 
-                <Text style={styles.details}>
-                {service.durationMinutes} min · €{service.price}
-                </Text>
+                <View style={styles.selectedService}>
+                <SelectedServiceCard
+                    service={service}
+                    symbol={category?.symbol ?? ""}
+                    onChange={() => router.back()}
+                />
+                </View>
             </View>
         </SafeAreaScreen>
     )
