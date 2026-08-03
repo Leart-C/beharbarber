@@ -22,6 +22,7 @@ import type { ServiceCategoryId } from "@/features/services/types/service-catego
 import { ServiceCard } from "@/features/services/components/service-card";
 import { servicesPreview } from "@/features/services/data/services-preview";
 import { ServiceList } from "@/features/services/components/service-list";
+import { router } from "expo-router";
 
 export function HomeScreen() {
   const [language, setLanguage] =
@@ -98,7 +99,12 @@ export function HomeScreen() {
               symbol={selectedCategory?.symbol ?? ""}
               services={filteredServices}
               onAddService={(service) => {
-                Alert.alert("Shërbimi u zgjodh", service.name);
+                router.push({
+                  pathname:"/booking/[serviceId]",
+                  params:{
+                    serviceId: service.id,
+                  },
+                })
               }}
             />
           </View>
