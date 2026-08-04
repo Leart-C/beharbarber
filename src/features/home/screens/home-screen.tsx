@@ -22,9 +22,18 @@ import type { ServiceCategoryId } from "@/features/services/types/service-catego
 import { ServiceCard } from "@/features/services/components/service-card";
 import { servicesPreview } from "@/features/services/data/services-preview";
 import { ServiceList } from "@/features/services/components/service-list";
+import { useScrollToSection } from "@/hooks/use-scroll-to-section";
 import { router } from "expo-router";
 
 export function HomeScreen() {
+  const {
+    scrollViewRef: homeScrollViewRef,
+    handleSectionLayout: handleServiceListLayout,
+    scrollToSection: scrollToServiceList,
+  } = useScrollToSection({
+    offset: 20,
+  });
+
   const [language, setLanguage] =
     useState<AppLanguage>("sq");
 
@@ -55,12 +64,20 @@ export function HomeScreen() {
     );
   };
 
+  const handleSelectCategory = (
+    categoryId: ServiceCategoryId,
+  ) => {
+    setSelectedCategoryId(categoryId);
+    scrollToServiceList();
+  };
+
   return (
     <SafeAreaScreen
       edges={["left", "right"]}
       className="bg-background"
     >
       <ScrollView
+        ref={homeScrollViewRef}
         showsVerticalScrollIndicator={false}
         contentInsetAdjustmentBehavior="never"
       >
@@ -90,10 +107,10 @@ export function HomeScreen() {
           <ServiceCategorySelector
             categories={serviceCategories}
             selectedCategoryId={selectedCategoryId}
-            onSelectCategory={setSelectedCategoryId}
+            onSelectCategory={handleSelectCategory}
           />
 
-          <View style={styles.servicesList}>
+          <View style={styles.servicesList} onLayout={handleServiceListLayout}>
             <ServiceList
               title={selectedCategory?.label ?? "Shërbimet"}
               symbol={selectedCategory?.symbol ?? ""}

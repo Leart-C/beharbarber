@@ -82,4 +82,5 @@ export const styles = StyleSheet.create({
     marginTop: spacing.xl,
     paddingBottom: spacing.xl,
   },
+  
 });

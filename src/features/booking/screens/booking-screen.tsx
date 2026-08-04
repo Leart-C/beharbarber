@@ -1,148 +1,215 @@
+import { useMemo, useState } from "react";
 import { router } from "expo-router";
-import { Pressable, ScrollView, Text, View, Alert } from "react-native";
+import {
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 
+import { SuccessConfirmation } from "@/components/feedback/success-confirmation";
 import { SafeAreaScreen } from "@/components/layout/safe-area-screen";
+import { useAppointments } from "@/features/appointments/hooks/use-appointments";
+import { serviceCategories } from "@/features/services/data/service-categories";
 import { servicesPreview } from "@/features/services/data/services-preview";
 
-import { SelectedServiceCard } from "../components/selected-service-card";
-import { serviceCategories } from "@/features/services/data/service-categories";
-
-import { styles } from "./booking-screen.styles";
-import { useMemo, useState } from "react";
+import { BookingSummary } from "../components/booking-summary";
 import { DateSelector } from "../components/date-selector";
-import { createBookingDates } from "../utils/create-booking-dates";
+import { SelectedServiceCard } from "../components/selected-service-card";
 import { TimeSlotSelector } from "../components/time-slot-selector";
 import { getPreviewTimeSlots } from "../data/availability-preview";
-import { BookingSummary } from "../components/booking-summary";
+import { createAppointment } from "../utils/create-appointment";
+import { createBookingDates } from "../utils/create-booking-dates";
+import { useScrollToSection } from "@/hooks/use-scroll-to-section";
+import { styles } from "./booking-screen.styles";
 
 type BookingScreenProps = {
-    serviceId: string;
+  serviceId: string;
 };
 
-export function BookingScreen({serviceId}:BookingScreenProps){
-    const service = servicesPreview.find(
-        (item) => item.id === serviceId,
-    );
+export function BookingScreen({
+  serviceId,
+}: BookingScreenProps) {
+  const { addAppointment } = useAppointments();
 
-    const category = service ? serviceCategories.find(
+  const {
+    scrollViewRef: bookingScrollViewRef,
+    handleSectionLayout:
+      handleBookingSummaryLayout,
+    scrollToSection: scrollToBookingSummary,
+  } = useScrollToSection({
+    offset: 20,
+  });
+
+  const [
+    isConfirmationVisible,
+    setIsConfirmationVisible,
+  ] = useState(false);
+
+  const bookingDates = useMemo(
+    () => createBookingDates(7),
+    [],
+  );
+
+  const [selectedDateId, setSelectedDateId] =
+    useState(bookingDates[0]?.id ?? "");
+
+  const [selectedTimeId, setSelectedTimeId] =
+    useState("");
+
+  const service = servicesPreview.find(
+    (item) => item.id === serviceId,
+  );
+
+  const category = service
+    ? serviceCategories.find(
         (item) => item.id === service.categoryId,
-    ) : undefined;
+      )
+    : undefined;
 
-    const bookingDates = useMemo(
-        ()=> createBookingDates(7),
-        [],
-    );
+  const timeSlots = useMemo(
+    () => getPreviewTimeSlots(selectedDateId),
+    [selectedDateId],
+  );
 
-    const [selectedDateId, setSelectedDateId] =
-        useState(bookingDates[0]?.id ?? "");
+  const selectedDate = bookingDates.find(
+    (date) => date.id === selectedDateId,
+  );
 
-    const [selectedTimeId, setSelectedTimeId] = useState("");
+  const selectedTime = timeSlots.find(
+    (timeSlot) => timeSlot.id === selectedTimeId,
+  );
 
-    const timeSlots = useMemo(
-        () => getPreviewTimeSlots(selectedDateId),
-        [selectedDateId],
-    )
+  const handleSelectTime = (
+      timeSlotId: string,
+    ) => {
+      setSelectedTimeId(timeSlotId);
+      scrollToBookingSummary();
+    };
 
-    const selectedDate = bookingDates.find(
-        (date) => date.id === selectedDateId,
-    );
-
-    const selectedTime = timeSlots.find(
-        (timeSlot) => timeSlot.id === selectedTimeId,
-    );
-
-    if(!service){
-        return (
-            <SafeAreaScreen>
-                <View style={styles.container}>
-                    <Text style={styles.title}>
-                        Shërbimi nuk u gjet
-                    </Text>
-
-                    <Pressable 
-                        onPress={()=> router.back()}
-                        style={styles.backButton}
-                    >
-                        <Text style={styles.backButtonText}>
-                            Kthehu
-                        </Text>
-                    </Pressable>
-                </View>
-            </SafeAreaScreen>
-        );
+  const handleConfirmBooking = () => {
+    if (
+      !service ||
+      !selectedDate ||
+      !selectedTime
+    ) {
+      return;
     }
 
+    const appointment = createAppointment({
+      service,
+      date: selectedDate,
+      timeSlot: selectedTime,
+    });
+
+    addAppointment(appointment);
+    setIsConfirmationVisible(true);
+  };
+
+  const handleSelectDate = (dateId: string) => {
+    setSelectedDateId(dateId);
+
+    // A time selected for the previous date
+    // might not be available for the new date.
+    setSelectedTimeId("");
+  };
+
+  if (!service) {
     return (
-        <SafeAreaScreen>
-            <ScrollView style={styles.container} showsVerticalScrollIndicator={false} >
-                <Pressable
-                    onPress={() => router.back()}
-                    style={styles.backLink}
-                >
-                    <Text style={styles.backLinkText}>‹ Kthehu</Text>
-                </Pressable>
+      <SafeAreaScreen>
+        <View style={styles.container}>
+          <Text style={styles.title}>
+            Shërbimi nuk u gjet
+          </Text>
 
-                <Text style={styles.eyebrow}>REZERVO TERMININ</Text>
+          <Pressable
+            onPress={() => router.back()}
+            style={styles.backButton}
+          >
+            <Text style={styles.backButtonText}>
+              Kthehu
+            </Text>
+          </Pressable>
+        </View>
+      </SafeAreaScreen>
+    );
+  }
 
-                <Text style={styles.title}>Zgjidh daten dhe oren</Text>
+  return (
+    <SafeAreaScreen>
+      <ScrollView
+        ref={bookingScrollViewRef}
+        style={styles.container}
+        showsVerticalScrollIndicator={false}
+      >
+        <Pressable
+          onPress={() => router.back()}
+          style={styles.backLink}
+        >
+          <Text style={styles.backLinkText}>
+            ‹ Kthehu
+          </Text>
+        </Pressable>
 
-                <View style={styles.selectedService}>
-                <SelectedServiceCard
-                    service={service}
-                    symbol={category?.symbol ?? ""}
-                    onChange={() => router.back()}
-                />
+        <Text style={styles.eyebrow}>
+          REZERVO TERMININ
+        </Text>
 
-                <View style={styles.dateSelector}>
-                    <DateSelector
-                        dates={bookingDates}
-                        selectedDateId={selectedDateId}
-                        onSelectDate={(date) => {
-                            setSelectedDateId(date.id);
-                            setSelectedTimeId("");
-                        }}
-                    />
+        <Text style={styles.title}>
+          Zgjidh datën dhe orën
+        </Text>
 
-                    <View style={styles.timeSelector}>
-                        <TimeSlotSelector
-                            timeSlots={timeSlots}
-                            selectedTimeId={selectedTimeId}
-                            onSelectTime={(timeSlot) => {
-                                setSelectedTimeId(timeSlot.id);
-                            }}
-                        />
+        <View style={styles.selectedService} >
+          <SelectedServiceCard
+            service={service}
+            symbol={category?.symbol ?? ""}
+            onChange={() => router.back()}
+          />
+        </View>
 
-                        <View style={styles.summary}>
-                            <BookingSummary
-                                service={service}
-                                selectedDate={selectedDate}
-                                selectedTime={selectedTime}
-                                onConfirm={()=> {
-                                    if(!selectedDate || !selectedTime){
-                                        return;
-                                    }
+        <View style={styles.dateSelector}>
+          <DateSelector
+            dates={bookingDates}
+            selectedDateId={selectedDateId}
+            onSelectDate={(date) => {
+              handleSelectDate(date.id);
+            }}
+          />
+        </View>
 
-                                    Alert.alert(
-                                        "Rezervimi u konfirmua",
-                                        `${service.name}, ${selectedDate.dayLabel} ${selectedDate.monthLabel}, ora ${selectedTime.label}`,
-                                        [
-                                            {
-                                                text: "Ne rregull",
-                                                onPress: ()=> {
-                                                    router.replace("/(tabs)/appointments");
-                                                }
-                                            }
-                                        ]
-                                    );
-                                }}
-                            >
+        <View style={styles.timeSelector}>
+          <TimeSlotSelector
+            timeSlots={timeSlots}
+            selectedTimeId={selectedTimeId}
+            onSelectTime={(timeSlot) => {
+              handleSelectTime(timeSlot.id);
+            }}
+          />
+        </View>
 
-                            </BookingSummary>
-                        </View>
-                    </View>
-                </View>
-                </View>
-            </ScrollView>
-        </SafeAreaScreen>
-    )
+        <View style={styles.summary} onLayout={handleBookingSummaryLayout}>
+          <BookingSummary
+            service={service}
+            selectedDate={selectedDate}
+            selectedTime={selectedTime}
+            onConfirm={handleConfirmBooking}
+          />
+        </View>
+      </ScrollView>
+
+      <SuccessConfirmation
+        visible={isConfirmationVisible}
+        title="Rezervimi u konfirmua!"
+        message={
+          selectedDate && selectedTime
+            ? `${service.name} · ${selectedDate.compactWeekdayLabel}, ${selectedDate.dayLabel} ${selectedDate.monthLabel} · ${selectedTime.label}`
+            : undefined
+        }
+        onFinished={() => {
+          setIsConfirmationVisible(false);
+          router.replace("/(tabs)/appointments");
+        }}
+      />
+    </SafeAreaScreen>
+  );
 }
