@@ -7,7 +7,7 @@ import {
 
 import { SafeAreaScreen } from "@/components/layout/safe-area-screen";
 import { UpcomingAppointmentCard } from "@/features/appointments/components/upcoming-appointment-card";
-import { appointmentPreview } from "@/features/appointments/data/appointment-preview";
+
 
 import { BarberAlert } from "../components/barber-alert";
 import { HomeHeader } from "../components/home-header";
@@ -19,13 +19,24 @@ import { styles } from "./home-screen.styles";
 import { ServiceCategorySelector } from "@/features/services/components/service-category-selector";
 import { serviceCategories } from "@/features/services/data/service-categories";
 import type { ServiceCategoryId } from "@/features/services/types/service-category";
-import { ServiceCard } from "@/features/services/components/service-card";
 import { servicesPreview } from "@/features/services/data/services-preview";
 import { ServiceList } from "@/features/services/components/service-list";
 import { useScrollToSection } from "@/hooks/use-scroll-to-section";
+import { ConfirmationDialog } from "@/components/feedback/confirmation-dialog";
+import { useAppointments } from "@/features/appointments/hooks/use-appointments";
+import { useNextAppointment } from "@/features/appointments/hooks/use-next-appointment";
+import type { Appointment } from "@/features/appointments/types/appointment";
 import { router } from "expo-router";
 
 export function HomeScreen() {
+  const { removeAppointment } = useAppointments();
+  const nextAppointment = useNextAppointment();
+
+  const [
+    appointmentToCancel,
+    setAppointmentToCancel,
+  ] = useState<Appointment | null>(null);
+
   const {
     scrollViewRef: homeScrollViewRef,
     handleSectionLayout: handleServiceListLayout,
@@ -57,12 +68,6 @@ export function HomeScreen() {
     );
   };
 
-  const handleCancelAppointment = () => {
-    Alert.alert(
-      "Anulo terminin",
-      "Anulimi i terminit do të lidhet me backend-in më vonë.",
-    );
-  };
 
   const handleSelectCategory = (
     categoryId: ServiceCategoryId,
@@ -98,11 +103,15 @@ export function HomeScreen() {
             />
           ) : null}
 
-          <UpcomingAppointmentCard
-            appointment={appointmentPreview}
-            onEdit={handleEditAppointment}
-            onCancel={handleCancelAppointment}
-          />
+          {nextAppointment ? (
+            <UpcomingAppointmentCard
+              appointment={nextAppointment}
+              onEdit={handleEditAppointment}
+              onCancel={() => {
+                setAppointmentToCancel(nextAppointment);
+              }}
+            />
+          ) : null}
 
           <ServiceCategorySelector
             categories={serviceCategories}
@@ -127,6 +136,29 @@ export function HomeScreen() {
           </View>
         </View>
       </ScrollView>
+      <ConfirmationDialog
+        visible={appointmentToCancel !== null}
+        title="Anulo terminin?"
+        message={
+          appointmentToCancel
+            ? `A je i sigurt që dëshiron të anulosh ${appointmentToCancel.serviceName}?`
+            : ""
+        }
+        confirmLabel="Anulo"
+        cancelLabel="Jo"
+        variant="destructive"
+        onCancel={() => {
+          setAppointmentToCancel(null);
+        }}
+        onConfirm={() => {
+          if (!appointmentToCancel) {
+            return;
+          }
+
+          removeAppointment(appointmentToCancel.id);
+          setAppointmentToCancel(null);
+        }}
+      />   
     </SafeAreaScreen>
   );
 }

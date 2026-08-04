@@ -13,6 +13,11 @@ const times = [
   "14:30",
   "15:00",
   "15:30",
+  "16:00",
+  "16:30",
+  "17:00",
+  "17:30",
+  "18:00"
 ];
 
 export function getPreviewTimeSlots(
@@ -21,11 +26,22 @@ export function getPreviewTimeSlots(
   const date = new Date(`${dateId}T12:00:00`);
   const weekday = date.getDay();
 
-  return times.map((time, index) => ({
-    id: time,
-    label: time,
+  return times.map((time, index) => {
+    const slotStartsAt = new Date(
+      `${dateId}T${time}:00`,
+    );
 
-    // Temporary variation between dates
-    isAvailable: (index + weekday) % 4 !== 0,
-  }));
+    const isInFuture =
+      slotStartsAt.getTime() > Date.now();
+
+    const isPreviewAvailable =
+      (index + weekday) % 4 !== 0;
+
+    return {
+      id: time,
+      label: time,
+      isAvailable:
+        isInFuture && isPreviewAvailable,
+    };
+  });
 }
