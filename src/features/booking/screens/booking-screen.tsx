@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View, Alert } from "react-native";
 
 import { SafeAreaScreen } from "@/components/layout/safe-area-screen";
 import { servicesPreview } from "@/features/services/data/services-preview";
@@ -13,6 +13,7 @@ import { DateSelector } from "../components/date-selector";
 import { createBookingDates } from "../utils/create-booking-dates";
 import { TimeSlotSelector } from "../components/time-slot-selector";
 import { getPreviewTimeSlots } from "../data/availability-preview";
+import { BookingSummary } from "../components/booking-summary";
 
 type BookingScreenProps = {
     serviceId: string;
@@ -41,6 +42,14 @@ export function BookingScreen({serviceId}:BookingScreenProps){
         () => getPreviewTimeSlots(selectedDateId),
         [selectedDateId],
     )
+
+    const selectedDate = bookingDates.find(
+        (date) => date.id === selectedDateId,
+    );
+
+    const selectedTime = timeSlots.find(
+        (timeSlot) => timeSlot.id === selectedTimeId,
+    );
 
     if(!service){
         return (
@@ -102,6 +111,34 @@ export function BookingScreen({serviceId}:BookingScreenProps){
                                 setSelectedTimeId(timeSlot.id);
                             }}
                         />
+
+                        <View style={styles.summary}>
+                            <BookingSummary
+                                service={service}
+                                selectedDate={selectedDate}
+                                selectedTime={selectedTime}
+                                onConfirm={()=> {
+                                    if(!selectedDate || !selectedTime){
+                                        return;
+                                    }
+
+                                    Alert.alert(
+                                        "Rezervimi u konfirmua",
+                                        `${service.name}, ${selectedDate.dayLabel} ${selectedDate.monthLabel}, ora ${selectedTime.label}`,
+                                        [
+                                            {
+                                                text: "Ne rregull",
+                                                onPress: ()=> {
+                                                    router.replace("/(tabs)/appointments");
+                                                }
+                                            }
+                                        ]
+                                    );
+                                }}
+                            >
+
+                            </BookingSummary>
+                        </View>
                     </View>
                 </View>
                 </View>

@@ -1,37 +1,72 @@
-import type {BookingDate} from "../types/booking-date";
+import type { BookingDate } from "../types/booking-date";
 
-function createDateId(date: Date){
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2,"0");
-    const day = String(date.getDate()).padStart(2,"0");
+function createDateId(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(
+    date.getMonth() + 1,
+  ).padStart(2, "0");
+  const day = String(
+    date.getDate(),
+  ).padStart(2, "0");
 
-    return `${year}-${month}-${day}`;
+  return `${year}-${month}-${day}`;
 }
 
-export function createBookingDates(numberOfDays = 7,):BookingDate[]{
-    const today = new Date();
-    
-    today.setHours(12,0,0,0);
+function capitalizeFirst(value: string): string {
+  if (!value) {
+    return value;
+  }
 
-    return Array.from({length:numberOfDays},(_,index)=>{
-        const date = new Date(today);
+  return (
+    value.charAt(0).toUpperCase() +
+    value.slice(1)
+  );
+}
 
-        date.setDate(today.getDate() + index);
+export function createBookingDates(
+  numberOfDays = 7,
+): BookingDate[] {
+  const today = new Date();
 
-        return{
-            id: createDateId(date),
-            date,
-            weekdayLabel: new Intl.DateTimeFormat("sq-AL",{
-                weekday: "short",
-            }).format(date),
-            dayLabel: new Intl.DateTimeFormat("sq-AL",{
-                day: "numeric",
-            }).format(date),
-            monthLabel: new Intl.DateTimeFormat("sq-AL",{
-                month: "short",
-            }).format(date),
-            isToday: index === 0,
-        };
+  today.setHours(12, 0, 0, 0);
+
+  return Array.from(
+    { length: numberOfDays },
+    (_, index) => {
+      const date = new Date(today);
+
+      date.setDate(today.getDate() + index);
+
+      const weekdayLabel = capitalizeFirst(
+        new Intl.DateTimeFormat("sq-AL", {
+          weekday: "long",
+        }).format(date),
+      );
+
+      return {
+        id: createDateId(date),
+        date,
+        weekdayLabel,
+
+        compactWeekdayLabel: capitalizeFirst(
+          weekdayLabel.replace(/^E\s+/i, ""),
+        ),
+        
+        dayLabel: new Intl.DateTimeFormat(
+          "sq-AL",
+          {
+            day: "numeric",
+          },
+        ).format(date),
+
+        monthLabel: capitalizeFirst(
+          new Intl.DateTimeFormat("sq-AL", {
+            month: "long",
+          }).format(date),
+        ),
+
+        isToday: index === 0,
+      };
     },
-    );
+  );
 }

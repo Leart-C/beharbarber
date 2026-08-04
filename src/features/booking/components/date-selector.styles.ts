@@ -45,10 +45,14 @@ export const styles = StyleSheet.create({
   },
 
   weekday: {
+    width: "100%",
+
     color: "rgba(255, 255, 255, 0.58)",
     fontFamily: fontFamily.semiBold,
-    fontSize: 13,
-    lineHeight: 18,
+    fontSize: 11,
+    lineHeight: 14,
+    letterSpacing: -0.2,
+    textAlign: "center",
     textTransform: "capitalize",
   },
 

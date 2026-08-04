@@ -48,6 +48,9 @@ export function DateSelector({dates,selectedDateId,onSelectDate}: DateSelectorPr
                                     ]}
                                     >
                                     <Text
+                                        numberOfLines={1}
+                                        adjustsFontSizeToFit
+                                        minimumFontScale={0.7}
                                         style={[
                                         styles.weekday,
                                         isSelected && styles.selectedText,
@@ -55,7 +58,7 @@ export function DateSelector({dates,selectedDateId,onSelectDate}: DateSelectorPr
                                     >
                                         {date.isToday
                                         ? "Sot"
-                                        : date.weekdayLabel}
+                                        : date.compactWeekdayLabel}
                                     </Text>
 
                                     <Text
