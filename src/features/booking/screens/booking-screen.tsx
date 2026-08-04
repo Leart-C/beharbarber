@@ -8,6 +8,9 @@ import { SelectedServiceCard } from "../components/selected-service-card";
 import { serviceCategories } from "@/features/services/data/service-categories";
 
 import { styles } from "./booking-screen.styles";
+import { useMemo, useState } from "react";
+import { DateSelector } from "../components/date-selector";
+import { createBookingDates } from "../utils/create-booking-dates";
 
 type BookingScreenProps = {
     serviceId: string;
@@ -21,6 +24,14 @@ export function BookingScreen({serviceId}:BookingScreenProps){
     const category = service ? serviceCategories.find(
         (item) => item.id === service.categoryId,
     ) : undefined;
+
+    const bookingDates = useMemo(
+        ()=> createBookingDates(7),
+        [],
+    );
+
+    const [selectedDateId, setSelectedDateId] =
+        useState(bookingDates[0]?.id ?? "");
 
     if(!service){
         return (
@@ -63,6 +74,16 @@ export function BookingScreen({serviceId}:BookingScreenProps){
                     symbol={category?.symbol ?? ""}
                     onChange={() => router.back()}
                 />
+
+                <View style={styles.dateSelector}>
+                    <DateSelector
+                        dates={bookingDates}
+                        selectedDateId={selectedDateId}
+                        onSelectDate={(date) => {
+                            setSelectedDateId(date.id);
+                        }}
+                    />
+                </View>
                 </View>
             </View>
         </SafeAreaScreen>

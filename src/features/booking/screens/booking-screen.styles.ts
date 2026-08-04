@@ -68,4 +68,8 @@ export const styles = StyleSheet.create({
   selectedService: {
     marginTop: spacing.xl,
   },
+  
+  dateSelector: {
+    marginTop: spacing.xl,
+  },
 });
