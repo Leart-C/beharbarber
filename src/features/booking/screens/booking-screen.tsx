@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 
 import { SafeAreaScreen } from "@/components/layout/safe-area-screen";
 import { servicesPreview } from "@/features/services/data/services-preview";
@@ -11,6 +11,8 @@ import { styles } from "./booking-screen.styles";
 import { useMemo, useState } from "react";
 import { DateSelector } from "../components/date-selector";
 import { createBookingDates } from "../utils/create-booking-dates";
+import { TimeSlotSelector } from "../components/time-slot-selector";
+import { getPreviewTimeSlots } from "../data/availability-preview";
 
 type BookingScreenProps = {
     serviceId: string;
@@ -32,6 +34,13 @@ export function BookingScreen({serviceId}:BookingScreenProps){
 
     const [selectedDateId, setSelectedDateId] =
         useState(bookingDates[0]?.id ?? "");
+
+    const [selectedTimeId, setSelectedTimeId] = useState("");
+
+    const timeSlots = useMemo(
+        () => getPreviewTimeSlots(selectedDateId),
+        [selectedDateId],
+    )
 
     if(!service){
         return (
@@ -56,7 +65,7 @@ export function BookingScreen({serviceId}:BookingScreenProps){
 
     return (
         <SafeAreaScreen>
-            <View style={styles.container}>
+            <ScrollView style={styles.container} showsVerticalScrollIndicator={false} >
                 <Pressable
                     onPress={() => router.back()}
                     style={styles.backLink}
@@ -81,11 +90,22 @@ export function BookingScreen({serviceId}:BookingScreenProps){
                         selectedDateId={selectedDateId}
                         onSelectDate={(date) => {
                             setSelectedDateId(date.id);
+                            setSelectedTimeId("");
                         }}
                     />
+
+                    <View style={styles.timeSelector}>
+                        <TimeSlotSelector
+                            timeSlots={timeSlots}
+                            selectedTimeId={selectedTimeId}
+                            onSelectTime={(timeSlot) => {
+                                setSelectedTimeId(timeSlot.id);
+                            }}
+                        />
+                    </View>
                 </View>
                 </View>
-            </View>
+            </ScrollView>
         </SafeAreaScreen>
     )
 }

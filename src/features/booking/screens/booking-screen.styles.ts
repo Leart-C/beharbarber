@@ -72,4 +72,9 @@ export const styles = StyleSheet.create({
   dateSelector: {
     marginTop: spacing.xl,
   },
+
+  timeSelector: {
+    marginTop: spacing.xl,
+    paddingBottom: spacing.xl,
+  },
 });
