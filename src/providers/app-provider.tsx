@@ -1,6 +1,7 @@
 import { ClerkProvider } from "@clerk/expo";
 import { tokenCache } from "@clerk/expo/token-cache";
 import type { PropsWithChildren } from "react";
+import { AppointmentsProvider } from "@/features/appointments/context/appointments-context";
 
 import { env } from "@/config/env";
 
@@ -10,7 +11,9 @@ export function AppProvider({ children }: PropsWithChildren) {
       publishableKey={env.clerkPublishableKey}
       tokenCache={tokenCache}
     >
-      {children}
+      <AppointmentsProvider>
+        {children}
+      </AppointmentsProvider>
     </ClerkProvider>
   );
 }
