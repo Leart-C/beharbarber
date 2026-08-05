@@ -1,6 +1,6 @@
-import type { ServiceCategory } from "../types/service-category.ts";
+import type { ServiceCategory } from "../types/service-category.js";
 
-export const serviceCategories: ServiceCategory[] = [
+export const serviceCategoriesMetadata: ServiceCategory[] = [
   {
     id: "haircut",
     label: "Qethje",

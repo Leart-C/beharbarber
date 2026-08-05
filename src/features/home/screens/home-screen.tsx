@@ -3,6 +3,8 @@ import {
   Alert,
   ScrollView,
   View,
+  ActivityIndicator,
+  Text
 } from "react-native";
 
 import { SafeAreaScreen } from "@/components/layout/safe-area-screen";
@@ -17,14 +19,13 @@ import {
 } from "../components/language-toggle";
 import { styles } from "./home-screen.styles";
 import { ServiceCategorySelector } from "@/features/services/components/service-category-selector";
-import { serviceCategories } from "@/features/services/data/service-categories";
 import type { ServiceCategoryId } from "@/features/services/types/service-category";
-import { servicesPreview } from "@/features/services/data/services-preview";
 import { ServiceList } from "@/features/services/components/service-list";
 import { useScrollToSection } from "@/hooks/use-scroll-to-section";
 import { ConfirmationDialog } from "@/components/feedback/confirmation-dialog";
 import { useAppointments } from "@/features/appointments/hooks/use-appointments";
 import { useNextAppointment } from "@/features/appointments/hooks/use-next-appointment";
+import { useServices } from "@/features/services/hooks/use-services";
 import type { Appointment } from "@/features/appointments/types/appointment";
 import { router } from "expo-router";
 
@@ -32,10 +33,9 @@ export function HomeScreen() {
   const { removeAppointment } = useAppointments();
   const nextAppointment = useNextAppointment();
 
-  const [
-    appointmentToCancel,
-    setAppointmentToCancel,
-  ] = useState<Appointment | null>(null);
+  const [appointmentToCancel,setAppointmentToCancel] = useState<Appointment | null>(null);
+
+  const {categories,services,isLoading: areServicesLoading,error: servicesError} = useServices()
 
   const {
     scrollViewRef: homeScrollViewRef,
@@ -45,19 +45,17 @@ export function HomeScreen() {
     offset: 20,
   });
 
-  const [language, setLanguage] =
-    useState<AppLanguage>("sq");
+  const [language, setLanguage] = useState<AppLanguage>("sq");
 
-  const [isAlertVisible, setIsAlertVisible] =
-    useState(true);
+  const [isAlertVisible, setIsAlertVisible] = useState(true);
 
   const [selectedCategoryId,setSelectedCategoryId] = useState<ServiceCategoryId>("haircut");
 
-  const selectedCategory = serviceCategories.find(
+  const selectedCategory = categories.find(
     (category) => category.id === selectedCategoryId,
   );
 
-  const filteredServices = servicesPreview.filter(
+  const filteredServices = services.filter(
     (service) => service.categoryId === selectedCategoryId,
   );
 
@@ -113,27 +111,49 @@ export function HomeScreen() {
             />
           ) : null}
 
-          <ServiceCategorySelector
-            categories={serviceCategories}
-            selectedCategoryId={selectedCategoryId}
-            onSelectCategory={handleSelectCategory}
-          />
+          {areServicesLoading ? (
+          <View style={styles.serviceState}>
+              <ActivityIndicator color="#4E84E5" />
 
-          <View style={styles.servicesList} onLayout={handleServiceListLayout}>
-            <ServiceList
-              title={selectedCategory?.label ?? "Shërbimet"}
-              symbol={selectedCategory?.symbol ?? ""}
-              services={filteredServices}
-              onAddService={(service) => {
-                router.push({
-                  pathname:"/booking/[serviceId]",
-                  params:{
-                    serviceId: service.id,
-                  },
-                })
-              }}
-            />
-          </View>
+              <Text style={styles.serviceStateText}>
+                Duke ngarkuar shërbimet...
+              </Text>
+            </View>
+          ) : servicesError ? (
+            <View style={styles.serviceState}>
+              <Text style={styles.serviceStateText}>
+                Shërbimet nuk mund të ngarkohen.
+              </Text>
+            </View>
+          ) : (
+            <>
+              <ServiceCategorySelector
+                categories={categories}
+                selectedCategoryId={selectedCategoryId}
+                onSelectCategory={handleSelectCategory}
+              />
+
+              <View style={styles.servicesList} onLayout={handleServiceListLayout}
+              >
+                <ServiceList
+                  title={
+                    selectedCategory?.label ??
+                    "Shërbimet"
+                  }
+                  symbol={selectedCategory?.symbol ?? ""}
+                  services={filteredServices}
+                  onAddService={(service) => {
+                    router.push({
+                      pathname: "/booking/[serviceId]",
+                      params: {
+                        serviceId: service.id,
+                      },
+                    });
+                  }}
+                />
+              </View>
+            </>
+          )}
         </View>
       </ScrollView>
       <ConfirmationDialog

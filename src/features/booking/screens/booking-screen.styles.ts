@@ -82,5 +82,22 @@ export const styles = StyleSheet.create({
     marginTop: spacing.xl,
     paddingBottom: spacing.xl,
   },
+
+  stateContainer: {
+    flex: 1,
+    padding: spacing.xl,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  stateMessage: {
+    marginTop: spacing.md,
+
+    color: "rgba(255, 255, 255, 0.68)",
+    fontFamily: fontFamily.medium,
+    fontSize: 15,
+    lineHeight: 22,
+    textAlign: "center",
+  },
   
 });

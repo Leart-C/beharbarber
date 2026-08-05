@@ -16,4 +16,17 @@ export const styles = StyleSheet.create({
     marginTop: spacing.xl,
     paddingBottom: spacing.xl,
   },
+
+  serviceState: {
+    minHeight: 180,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: spacing.md,
+  },
+
+  serviceStateText: {
+    color: "rgba(255, 255, 255, 0.62)",
+    fontSize: 14,
+    textAlign: "center",
+  },
 });
