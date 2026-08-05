@@ -24,6 +24,8 @@ import { useNextAppointment } from "@/features/appointments/hooks/use-next-appoi
 import { useServices } from "@/features/services/hooks/use-services";
 import type { Appointment } from "@/features/appointments/types/appointment";
 import { router } from "expo-router";
+import { useEffect } from "react";
+
 
 export function HomeScreen() {
   const { removeAppointment } = useAppointments();
