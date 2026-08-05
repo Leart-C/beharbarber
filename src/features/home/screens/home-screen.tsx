@@ -7,16 +7,12 @@ import {
   Text
 } from "react-native";
 
+import { useAuth } from "@clerk/expo";
 import { SafeAreaScreen } from "@/components/layout/safe-area-screen";
 import { UpcomingAppointmentCard } from "@/features/appointments/components/upcoming-appointment-card";
-
-
 import { BarberAlert } from "../components/barber-alert";
 import { HomeHeader } from "../components/home-header";
-import {
-  type AppLanguage,
-  LanguageToggle,
-} from "../components/language-toggle";
+import {type AppLanguage,LanguageToggle,} from "../components/language-toggle";
 import { styles } from "./home-screen.styles";
 import { ServiceCategorySelector } from "@/features/services/components/service-category-selector";
 import type { ServiceCategoryId } from "@/features/services/types/service-category";
