@@ -7,6 +7,9 @@ import {
 } from "react";
 import type { PropsWithChildren } from "react";
 
+import { useAuthenticatedApi } from "@/hooks/use-authenticated-api";
+
+import { cancelAppointment as cancelAppointmentRequest } from "../api/cancel-appointment";
 import { useRemoteAppointments } from "../hooks/use-remote-appointments";
 import type { Appointment } from "../types/appointment";
 
@@ -14,8 +17,10 @@ type AppointmentsContextValue = {
   appointments: Appointment[];
   isLoading: boolean;
   error: Error | null;
+  cancellingAppointmentId: string | null;
   addAppointment: (appointment: Appointment) => void;
   removeAppointment: (appointmentId: string) => void;
+  cancelAppointment: (appointmentId: string) => Promise<void>;
   refreshAppointments: () => void;
 };
 
@@ -26,6 +31,8 @@ export const AppointmentContext = createContext<
 export function AppointmentsProvider({
   children,
 }: PropsWithChildren) {
+  const { authenticatedRequest } = useAuthenticatedApi();
+
   const {
     appointments: remoteAppointments,
     isLoading,
@@ -34,6 +41,8 @@ export function AppointmentsProvider({
   } = useRemoteAppointments();
 
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [cancellingAppointmentId, setCancellingAppointmentId] =
+    useState<string | null>(null);
 
   useEffect(() => {
     if (!isLoading && !error) {
@@ -41,29 +50,46 @@ export function AppointmentsProvider({
     }
   }, [remoteAppointments, isLoading, error]);
 
-  const addAppointment = useCallback(
-    (appointment: Appointment) => {
-      setAppointments((currentAppointments) => [
-        appointment,
-        ...currentAppointments.filter(
-          (currentAppointment) =>
-            currentAppointment.id !== appointment.id,
-        ),
-      ]);
-    },
-    [],
-  );
+  const addAppointment = useCallback((appointment: Appointment) => {
+    setAppointments((currentAppointments) => [
+      appointment,
+      ...currentAppointments.filter(
+        (currentAppointment) =>
+          currentAppointment.id !== appointment.id,
+      ),
+    ]);
+  }, []);
 
-  const removeAppointment = useCallback(
-    (appointmentId: string) => {
-      setAppointments((currentAppointments) =>
-        currentAppointments.filter(
-          (appointment) =>
-            appointment.id !== appointmentId,
-        ),
-      );
+  const removeAppointment = useCallback((appointmentId: string) => {
+    setAppointments((currentAppointments) =>
+      currentAppointments.filter(
+        (appointment) => appointment.id !== appointmentId,
+      ),
+    );
+  }, []);
+
+  const cancelAppointment = useCallback(
+    async (appointmentId: string) => {
+      setCancellingAppointmentId(appointmentId);
+
+      try {
+        await cancelAppointmentRequest({
+          authenticatedRequest,
+          appointmentId,
+        });
+
+        setAppointments((currentAppointments) =>
+          currentAppointments.filter(
+            (appointment) => appointment.id !== appointmentId,
+          ),
+        );
+
+        refreshAppointments();
+      } finally {
+        setCancellingAppointmentId(null);
+      }
     },
-    [],
+    [authenticatedRequest, refreshAppointments],
   );
 
   const value = useMemo(
@@ -71,16 +97,20 @@ export function AppointmentsProvider({
       appointments,
       isLoading,
       error,
+      cancellingAppointmentId,
       addAppointment,
       removeAppointment,
+      cancelAppointment,
       refreshAppointments,
     }),
     [
       appointments,
       isLoading,
       error,
+      cancellingAppointmentId,
       addAppointment,
       removeAppointment,
+      cancelAppointment,
       refreshAppointments,
     ],
   );

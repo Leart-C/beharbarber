@@ -1,5 +1,6 @@
 import { useState } from "react";
 import {
+  Alert,
   ScrollView,
   Text,
   View,
@@ -17,7 +18,8 @@ import { router } from "expo-router";
 export function AppointmentsScreen() {
   const {
     appointments,
-    removeAppointment,
+    cancelAppointment,
+    cancellingAppointmentId,
   } = useAppointments();
 
   const [
@@ -30,6 +32,37 @@ export function AppointmentsScreen() {
       new Date(first.startsAt).getTime() -
       new Date(second.startsAt).getTime(),
   );
+
+  const isCancelling = appointmentToCancel?.id === cancellingAppointmentId;
+
+  const handleConfirmCancellation =
+  async () => {
+    if (
+      !appointmentToCancel ||
+      isCancelling
+    ) {
+      return;
+    }
+
+    try {
+      await cancelAppointment(
+        appointmentToCancel.id,
+      );
+
+      setAppointmentToCancel(null);
+      router.replace("/(tabs)");
+    } catch (error) {
+      console.error(
+        "Appointment cancellation failed:",
+        error,
+      );
+
+      Alert.alert(
+        "Anulimi dështoi",
+        "Nuk mundëm ta anulonim terminin. Provo përsëri.",
+      );
+    }
+  };
 
 
   return (
@@ -88,19 +121,13 @@ export function AppointmentsScreen() {
         confirmLabel="Anulo"
         cancelLabel="Jo"
         variant="destructive"
+        isLoading={isCancelling}
         onCancel={() => {
-          setAppointmentToCancel(null);
-        }}
-        onConfirm={() => {
-          if (!appointmentToCancel) {
-            return;
+          if (!isCancelling) {
+            setAppointmentToCancel(null);
           }
-
-          removeAppointment(appointmentToCancel.id);
-          setAppointmentToCancel(null);
-
-          router.replace("/(tabs)");
         }}
+        onConfirm={handleConfirmCancellation}
       />
     </SafeAreaScreen>
   );

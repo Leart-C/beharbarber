@@ -1,4 +1,5 @@
 import {
+  ActivityIndicator,
   Modal,
   Pressable,
   Text,
@@ -6,6 +7,7 @@ import {
 } from "react-native";
 
 import { styles } from "./confirmation-dialog.styles";
+import { brandColors } from "@/theme/colors";
 
 type ConfirmationDialogProps = {
   visible: boolean;
@@ -13,6 +15,7 @@ type ConfirmationDialogProps = {
   message: string;
   confirmLabel: string;
   cancelLabel?: string;
+  isLoading?: boolean;
   variant?: "default" | "destructive";
   onConfirm: () => void;
   onCancel: () => void;
@@ -21,6 +24,7 @@ type ConfirmationDialogProps = {
 export function ConfirmationDialog({
   visible,
   title,
+  isLoading = false,
   message,
   confirmLabel,
   cancelLabel = "Jo",
@@ -70,6 +74,7 @@ export function ConfirmationDialog({
 
           <View style={styles.actions}>
             <Pressable
+              disabled={isLoading}
               onPress={onCancel}
               style={styles.actionPressable}
             >
@@ -88,6 +93,7 @@ export function ConfirmationDialog({
             </Pressable>
 
             <Pressable
+              disabled={isLoading}
               onPress={onConfirm}
               style={styles.actionPressable}
             >
@@ -100,9 +106,15 @@ export function ConfirmationDialog({
                     pressed && styles.pressedButton,
                   ]}
                 >
-                  <Text style={styles.confirmLabel}>
-                    {confirmLabel}
-                  </Text>
+                  {isLoading ? (
+                    <ActivityIndicator
+                      color={brandColors.white}
+                    />
+                  ) : (
+                    <Text style={styles.confirmLabel}>
+                      {confirmLabel}
+                    </Text>
+                  )}
                 </View>
               )}
             </Pressable>

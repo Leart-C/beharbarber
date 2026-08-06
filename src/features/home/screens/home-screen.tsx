@@ -4,10 +4,9 @@ import {
   ScrollView,
   View,
   ActivityIndicator,
-  Text
+  Text,
 } from "react-native";
 
-import { useAuth } from "@clerk/expo";
 import { SafeAreaScreen } from "@/components/layout/safe-area-screen";
 import { UpcomingAppointmentCard } from "@/features/appointments/components/upcoming-appointment-card";
 import { BarberAlert } from "../components/barber-alert";
@@ -24,14 +23,14 @@ import { useNextAppointment } from "@/features/appointments/hooks/use-next-appoi
 import { useServices } from "@/features/services/hooks/use-services";
 import type { Appointment } from "@/features/appointments/types/appointment";
 import { router } from "expo-router";
-import { useEffect } from "react";
 
 
 export function HomeScreen() {
-  const { removeAppointment } = useAppointments();
-  const nextAppointment = useNextAppointment();
+  const { cancelAppointment,cancellingAppointmentId, } = useAppointments();
 
+  const nextAppointment = useNextAppointment();
   const [appointmentToCancel,setAppointmentToCancel] = useState<Appointment | null>(null);
+  const isCancelling = appointmentToCancel?.id === cancellingAppointmentId;
 
   const {categories,services,isLoading: areServicesLoading,error: servicesError} = useServices()
 
@@ -70,6 +69,34 @@ export function HomeScreen() {
   ) => {
     setSelectedCategoryId(categoryId);
     scrollToServiceList();
+  };
+
+  const handleConfirmCancellation =
+  async () => {
+    if (
+      !appointmentToCancel ||
+      isCancelling
+    ) {
+      return;
+    }
+
+    try {
+      await cancelAppointment(
+        appointmentToCancel.id,
+      );
+
+      setAppointmentToCancel(null);
+    } catch (error) {
+      console.error(
+        "Appointment cancellation failed:",
+        error,
+      );
+
+      Alert.alert(
+        "Anulimi dështoi",
+        "Nuk mundëm ta anulonim terminin. Provo përsëri.",
+      );
+    }
   };
 
   return (
@@ -165,18 +192,14 @@ export function HomeScreen() {
         confirmLabel="Anulo"
         cancelLabel="Jo"
         variant="destructive"
+        isLoading={isCancelling}
         onCancel={() => {
-          setAppointmentToCancel(null);
-        }}
-        onConfirm={() => {
-          if (!appointmentToCancel) {
-            return;
+          if (!isCancelling) {
+            setAppointmentToCancel(null);
           }
-
-          removeAppointment(appointmentToCancel.id);
-          setAppointmentToCancel(null);
         }}
-      />   
+        onConfirm={handleConfirmCancellation}
+      />  
     </SafeAreaScreen>
   );
 }
