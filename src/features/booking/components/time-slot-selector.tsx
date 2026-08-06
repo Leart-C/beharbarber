@@ -18,6 +18,14 @@ export function TimeSlotSelector({
     <View>
       <Text style={styles.title}>Zgjidh orën</Text>
 
+      <View style={styles.availabilityHint}>
+        <View style={styles.hintLine} />
+
+        <Text style={styles.hintText}>
+          Orari me vijë nuk është i disponueshëm
+        </Text>
+      </View>
+
       <View style={styles.grid}>
         {timeSlots.map((timeSlot) => {
           const isSelected =

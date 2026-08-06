@@ -13,7 +13,7 @@ export const styles = StyleSheet.create({
   },
 
   grid: {
-    marginTop: spacing.md,
+    marginTop: spacing.sm,
     flexDirection: "row",
     flexWrap: "wrap",
     gap: spacing.sm,
@@ -65,4 +65,28 @@ export const styles = StyleSheet.create({
     color: "rgba(255, 255, 255, 0.25)",
     textDecorationLine: "line-through",
   },
+
+  availabilityHint: {
+  marginTop: spacing.sm,
+
+  flexDirection: "row",
+  alignItems: "center",
+  gap: spacing.sm,
+},
+
+hintLine: {
+  width: 22,
+  height: 1.5,
+
+  borderRadius: 999,
+  backgroundColor:
+    "rgba(255, 255, 255, 0.32)",
+},
+
+hintText: {
+  color: "rgba(255, 255, 255, 0.42)",
+  fontFamily: fontFamily.medium,
+  fontSize: 12,
+  lineHeight: 17,
+},
 });

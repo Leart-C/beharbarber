@@ -3,6 +3,12 @@ import { useCallback } from "react";
 
 import { apiRequest } from "@/lib/api/api-client";
 
+export type AuthenticatedRequest = <T>(
+  path: string,
+  options?: RequestInit,
+) => Promise<T>;
+
+
 export function useAuthenticatedApi() {
   const {
     getToken,
@@ -10,13 +16,16 @@ export function useAuthenticatedApi() {
     isSignedIn,
   } = useAuth();
 
-  const authenticatedRequest = useCallback(
+  const authenticatedRequest: AuthenticatedRequest =
+  useCallback(
     async function request<T>(
       path: string,
       options: RequestInit = {},
     ): Promise<T> {
       if (!isLoaded) {
-        throw new Error("Clerk is still loading.");
+        throw new Error(
+          "Clerk is still loading.",
+        );
       }
 
       if (!isSignedIn) {
@@ -38,7 +47,11 @@ export function useAuthenticatedApi() {
         token,
       });
     },
-    [getToken, isLoaded, isSignedIn],
+    [
+      getToken,
+      isLoaded,
+      isSignedIn,
+    ],
   );
 
   return {

@@ -1,7 +1,8 @@
-import { useMemo, useState } from "react";
 import { router } from "expo-router";
+import { useMemo, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Pressable,
   ScrollView,
   Text,
@@ -10,17 +11,19 @@ import {
 
 import { SuccessConfirmation } from "@/components/feedback/success-confirmation";
 import { SafeAreaScreen } from "@/components/layout/safe-area-screen";
+import { createAppointment } from "@/features/appointments/api/create-appointment";
 import { useAppointments } from "@/features/appointments/hooks/use-appointments";
 import { useServices } from "@/features/services/hooks/use-services";
+import { useAuthenticatedApi } from "@/hooks/use-authenticated-api";
 import { useScrollToSection } from "@/hooks/use-scroll-to-section";
+import { ApiError } from "@/lib/api/api-client";
 import { brandColors } from "@/theme/colors";
 
 import { BookingSummary } from "../components/booking-summary";
 import { DateSelector } from "../components/date-selector";
 import { SelectedServiceCard } from "../components/selected-service-card";
 import { TimeSlotSelector } from "../components/time-slot-selector";
-import { getPreviewTimeSlots } from "../data/availability-preview";
-import { createAppointment } from "../utils/create-appointment";
+import { useAvailability } from "../hooks/use-availability";
 import { createBookingDates } from "../utils/create-booking-dates";
 import { styles } from "./booking-screen.styles";
 
@@ -28,10 +31,9 @@ type BookingScreenProps = {
   serviceId: string;
 };
 
-export function BookingScreen({
-  serviceId,
-}: BookingScreenProps) {
+export function BookingScreen({ serviceId }: BookingScreenProps) {
   const { addAppointment } = useAppointments();
+  const { authenticatedRequest } = useAuthenticatedApi();
 
   const {
     categories,
@@ -42,97 +44,110 @@ export function BookingScreen({
 
   const {
     scrollViewRef: bookingScrollViewRef,
-    handleSectionLayout:
-      handleBookingSummaryLayout,
+    handleSectionLayout: handleBookingSummaryLayout,
     scrollToSection: scrollToBookingSummary,
-  } = useScrollToSection({
-    offset: 20,
+  } = useScrollToSection({ offset: 20 });
+
+  const [isCreatingAppointment, setIsCreatingAppointment] = useState(false);
+  const [isConfirmationVisible, setIsConfirmationVisible] = useState(false);
+
+  const bookingDates = useMemo(() => createBookingDates(7), []);
+  const [selectedDateId, setSelectedDateId] = useState(
+    bookingDates[0]?.id ?? "",
+  );
+  const [selectedTimeId, setSelectedTimeId] = useState("");
+
+  const {
+    timeSlots,
+    isLoading: isAvailabilityLoading,
+    error: availabilityError,
+  } = useAvailability({
+    serviceId,
+    date: selectedDateId,
   });
 
-  const [
-    isConfirmationVisible,
-    setIsConfirmationVisible,
-  ] = useState(false);
-
-  const bookingDates = useMemo(
-    () => createBookingDates(7),
-    [],
-  );
-
-  const [selectedDateId, setSelectedDateId] =
-    useState(bookingDates[0]?.id ?? "");
-
-  const [selectedTimeId, setSelectedTimeId] =
-    useState("");
-
-  const service = services.find(
-    (item) => item.id === serviceId,
-  );
+  const service = services.find((item) => item.id === serviceId);
 
   const category = service
-    ? categories.find(
-        (item) =>
-          item.id === service.categoryId,
-      )
+    ? categories.find((item) => item.id === service.categoryId)
     : undefined;
-
-  const timeSlots = useMemo(
-    () => getPreviewTimeSlots(selectedDateId),
-    [selectedDateId],
-  );
 
   const selectedDate = bookingDates.find(
     (date) => date.id === selectedDateId,
   );
 
   const selectedTime = timeSlots.find(
-    (timeSlot) =>
-      timeSlot.id === selectedTimeId,
+    (timeSlot) => timeSlot.id === selectedTimeId,
   );
 
   const handleSelectDate = (dateId: string) => {
     setSelectedDateId(dateId);
-
-    // A time selected for the previous date may
-    // not be available on the newly selected date.
     setSelectedTimeId("");
   };
 
-  const handleSelectTime = (
-    timeSlotId: string,
-  ) => {
+  const handleSelectTime = (timeSlotId: string) => {
     setSelectedTimeId(timeSlotId);
     scrollToBookingSummary();
   };
 
-  const handleConfirmBooking = () => {
+  const handleConfirmBooking = async () => {
     if (
       !service ||
       !selectedDate ||
-      !selectedTime
+      !selectedTime ||
+      isCreatingAppointment
     ) {
       return;
     }
 
-    const appointment = createAppointment({
-      service,
-      date: selectedDate,
-      timeSlot: selectedTime,
-    });
+    try {
+      setIsCreatingAppointment(true);
 
-    addAppointment(appointment);
-    setIsConfirmationVisible(true);
+      const response = await createAppointment({
+        authenticatedRequest,
+        input: {
+          serviceId: service.id,
+          startsAt: selectedTime.startsAt,
+        },
+      });
+
+      const createdAppointment = response.appointment;
+
+      addAppointment({
+        id: createdAppointment.id,
+        startsAt: createdAppointment.startsAt,
+        serviceName: createdAppointment.serviceName,
+        durationMinutes: createdAppointment.durationMinutes,
+        price: createdAppointment.priceCents / 100,
+        currency: createdAppointment.currency,
+      });
+
+      setIsConfirmationVisible(true);
+    } catch (error) {
+      console.error("Appointment creation failed:", error);
+
+      if (error instanceof ApiError && error.status === 409) {
+        Alert.alert(
+          "Orari nuk është i disponueshëm",
+          error.message,
+        );
+        return;
+      }
+
+      Alert.alert(
+        "Rezervimi dështoi",
+        "Nuk mundëm ta konfirmojmë rezervimin. Provo përsëri.",
+      );
+    } finally {
+      setIsCreatingAppointment(false);
+    }
   };
 
   if (areServicesLoading) {
     return (
       <SafeAreaScreen>
         <View style={styles.stateContainer}>
-          <ActivityIndicator
-            size="large"
-            color={brandColors.blue}
-          />
-
+          <ActivityIndicator size="large" color={brandColors.blue} />
           <Text style={styles.stateMessage}>
             Duke ngarkuar shërbimin...
           </Text>
@@ -153,9 +168,7 @@ export function BookingScreen({
             onPress={() => router.back()}
             style={styles.backButton}
           >
-            <Text style={styles.backButtonText}>
-              Kthehu
-            </Text>
+            <Text style={styles.backButtonText}>Kthehu</Text>
           </Pressable>
         </View>
       </SafeAreaScreen>
@@ -166,17 +179,13 @@ export function BookingScreen({
     return (
       <SafeAreaScreen>
         <View style={styles.stateContainer}>
-          <Text style={styles.title}>
-            Shërbimi nuk u gjet
-          </Text>
+          <Text style={styles.title}>Shërbimi nuk u gjet</Text>
 
           <Pressable
             onPress={() => router.back()}
             style={styles.backButton}
           >
-            <Text style={styles.backButtonText}>
-              Kthehu
-            </Text>
+            <Text style={styles.backButtonText}>Kthehu</Text>
           </Pressable>
         </View>
       </SafeAreaScreen>
@@ -194,18 +203,11 @@ export function BookingScreen({
           onPress={() => router.back()}
           style={styles.backLink}
         >
-          <Text style={styles.backLinkText}>
-            ‹ Kthehu
-          </Text>
+          <Text style={styles.backLinkText}>‹ Kthehu</Text>
         </Pressable>
 
-        <Text style={styles.eyebrow}>
-          REZERVO TERMININ
-        </Text>
-
-        <Text style={styles.title}>
-          Zgjidh datën dhe orën
-        </Text>
+        <Text style={styles.eyebrow}>REZERVO TERMININ</Text>
+        <Text style={styles.title}>Zgjidh datën dhe orën</Text>
 
         <View style={styles.selectedService}>
           <SelectedServiceCard
@@ -219,20 +221,39 @@ export function BookingScreen({
           <DateSelector
             dates={bookingDates}
             selectedDateId={selectedDateId}
-            onSelectDate={(date) => {
-              handleSelectDate(date.id);
-            }}
+            onSelectDate={(date) => handleSelectDate(date.id)}
           />
         </View>
 
         <View style={styles.timeSelector}>
-          <TimeSlotSelector
-            timeSlots={timeSlots}
-            selectedTimeId={selectedTimeId}
-            onSelectTime={(timeSlot) => {
-              handleSelectTime(timeSlot.id);
-            }}
-          />
+          {isAvailabilityLoading ? (
+            <View style={styles.availabilityState}>
+              <ActivityIndicator color={brandColors.blue} />
+              <Text style={styles.availabilityMessage}>
+                Duke kontrolluar oraret...
+              </Text>
+            </View>
+          ) : availabilityError ? (
+            <View style={styles.availabilityState}>
+              <Text style={styles.availabilityMessage}>
+                Oraret nuk mund të ngarkohen.
+              </Text>
+            </View>
+          ) : timeSlots.length === 0 ? (
+            <View style={styles.availabilityState}>
+              <Text style={styles.availabilityMessage}>
+                Nuk ka orare të disponueshme për këtë ditë.
+              </Text>
+            </View>
+          ) : (
+            <TimeSlotSelector
+              timeSlots={timeSlots}
+              selectedTimeId={selectedTimeId}
+              onSelectTime={(timeSlot) =>
+                handleSelectTime(timeSlot.id)
+              }
+            />
+          )}
         </View>
 
         <View
@@ -244,6 +265,7 @@ export function BookingScreen({
             selectedDate={selectedDate}
             selectedTime={selectedTime}
             onConfirm={handleConfirmBooking}
+            isConfirming={isCreatingAppointment}
           />
         </View>
       </ScrollView>
@@ -258,10 +280,7 @@ export function BookingScreen({
         }
         onFinished={() => {
           setIsConfirmationVisible(false);
-
-          router.replace(
-            "/(tabs)/appointments",
-          );
+          router.replace("/(tabs)/appointments");
         }}
       />
     </SafeAreaScreen>

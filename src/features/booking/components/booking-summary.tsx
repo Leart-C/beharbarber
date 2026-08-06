@@ -13,9 +13,10 @@ type BookingSummaryProps = {
     selectedDate?: BookingDate;
     selectedTime?: BookingTimeSlot;
     onConfirm: () => void;
+    isConfirming?: boolean;
 }
 
-export function BookingSummary({service,selectedDate,selectedTime,onConfirm}:BookingSummaryProps){
+export function BookingSummary({service,selectedDate,selectedTime,onConfirm,isConfirming=false}:BookingSummaryProps){
     const canConfirm = selectedDate !== undefined && selectedTime !== undefined;
 
     const dateLabel = selectedDate
@@ -89,6 +90,7 @@ export function BookingSummary({service,selectedDate,selectedTime,onConfirm}:Boo
                     <ConfirmBookingButton
                     onPress={onConfirm}
                     disabled={!canConfirm}
+                    isLoading={isConfirming}
                     />
                 </View>
         </View>

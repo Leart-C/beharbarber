@@ -99,5 +99,30 @@ export const styles = StyleSheet.create({
     lineHeight: 22,
     textAlign: "center",
   },
-  
+
+  availabilityState: {
+    minHeight: 100,
+    alignItems: "center",
+    justifyContent: "center",
+
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.xl,
+
+    borderRadius: 18,
+    backgroundColor:
+      "rgba(255, 255, 255, 0.04)",
+    borderWidth: 1,
+    borderColor:
+      "rgba(255, 255, 255, 0.08)",
+  },
+
+  availabilityMessage: {
+    marginTop: spacing.sm,
+
+    color: "rgba(255, 255, 255, 0.58)",
+    fontFamily: fontFamily.medium,
+    fontSize: 14,
+    lineHeight: 20,
+    textAlign: "center",
+  },
 });
