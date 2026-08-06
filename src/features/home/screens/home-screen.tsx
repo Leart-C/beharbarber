@@ -22,6 +22,7 @@ import { useAppointments } from "@/features/appointments/hooks/use-appointments"
 import { useNextAppointment } from "@/features/appointments/hooks/use-next-appointment";
 import { useServices } from "@/features/services/hooks/use-services";
 import type { Appointment } from "@/features/appointments/types/appointment";
+import { useCurrentAnnouncement } from "@/features/announcements/hooks/use-current-announcement";
 import { router } from "expo-router";
 
 
@@ -44,7 +45,20 @@ export function HomeScreen() {
 
   const [language, setLanguage] = useState<AppLanguage>("sq");
 
-  const [isAlertVisible, setIsAlertVisible] = useState(true);
+  const { announcement } = useCurrentAnnouncement();
+
+  const [dismissedAnnouncementId, setDismissedAnnouncementId] =
+    useState<string | null>(null);
+
+  const announcementMessage = announcement
+    ? language === "en"
+      ? announcement.messageEn ?? announcement.messageSq
+      : announcement.messageSq
+    : null;
+
+  const shouldShowAnnouncement =
+    announcement !== null &&
+    announcement.id !== dismissedAnnouncementId;
 
   const [selectedCategoryId,setSelectedCategoryId] = useState<ServiceCategoryId>("haircut");
 
@@ -119,10 +133,10 @@ export function HomeScreen() {
         />
 
         <View style={styles.content}>
-          {isAlertVisible ? (
+          {shouldShowAnnouncement && announcementMessage ? (
             <BarberAlert
-              message="Të premten mbyllim herët, në 15:00."
-              onDismiss={() => setIsAlertVisible(false)}
+              message={announcementMessage}
+              onDismiss={() => setDismissedAnnouncementId(announcement.id)}
             />
           ) : null}
 
