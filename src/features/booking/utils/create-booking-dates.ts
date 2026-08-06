@@ -24,49 +24,80 @@ function capitalizeFirst(value: string): string {
 }
 
 export function createBookingDates(
+  workingDays: number[],
   numberOfDays = 7,
 ): BookingDate[] {
-  const today = new Date();
+  if (
+    workingDays.length === 0 ||
+    numberOfDays <= 0
+  ) {
+    return [];
+  }
 
+  const workingDaySet =
+    new Set(workingDays);
+
+  const today = new Date();
   today.setHours(12, 0, 0, 0);
 
-  return Array.from(
-    { length: numberOfDays },
-    (_, index) => {
-      const date = new Date(today);
+  const bookingDates: BookingDate[] = [];
+  let dayOffset = 0;
 
-      date.setDate(today.getDate() + index);
+  while (
+    bookingDates.length < numberOfDays &&
+    dayOffset < 366
+  ) {
+    const date = new Date(today);
+    date.setDate(
+      today.getDate() + dayOffset,
+    );
 
-      const weekdayLabel = capitalizeFirst(
-        new Intl.DateTimeFormat("sq-AL", {
-          weekday: "long",
-        }).format(date),
-      );
+    dayOffset += 1;
 
-      return {
-        id: createDateId(date),
-        date,
-        weekdayLabel,
+    if (
+      !workingDaySet.has(date.getDay())
+    ) {
+      continue;
+    }
 
-        compactWeekdayLabel: capitalizeFirst(
-          weekdayLabel.replace(/^E\s+/i, ""),
+    const weekdayLabel = capitalizeFirst(
+      new Intl.DateTimeFormat("sq-AL", {
+        weekday: "long",
+      }).format(date),
+    );
+
+    bookingDates.push({
+      id: createDateId(date),
+      date,
+      weekdayLabel,
+      compactWeekdayLabel:
+        capitalizeFirst(
+          weekdayLabel.replace(
+            /^E\s+/i,
+            "",
+          ),
         ),
-        
-        dayLabel: new Intl.DateTimeFormat(
+      dayLabel:
+        new Intl.DateTimeFormat(
           "sq-AL",
           {
             day: "numeric",
           },
         ).format(date),
-
-        monthLabel: capitalizeFirst(
-          new Intl.DateTimeFormat("sq-AL", {
-            month: "long",
-          }).format(date),
+      monthLabel:
+        capitalizeFirst(
+          new Intl.DateTimeFormat(
+            "sq-AL",
+            {
+              month: "long",
+            },
+          ).format(date),
         ),
+      isToday:
+        date.getTime() ===
+        today.getTime(),
+    });
+  }
 
-        isToday: index === 0,
-      };
-    },
-  );
+  return bookingDates;
 }

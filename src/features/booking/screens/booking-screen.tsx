@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -18,7 +18,7 @@ import { useAuthenticatedApi } from "@/hooks/use-authenticated-api";
 import { useScrollToSection } from "@/hooks/use-scroll-to-section";
 import { ApiError } from "@/lib/api/api-client";
 import { brandColors } from "@/theme/colors";
-
+import { useWorkingDays } from "@/features/schedule/hooks/use-working-days";
 import { BookingSummary } from "../components/booking-summary";
 import { DateSelector } from "../components/date-selector";
 import { SelectedServiceCard } from "../components/selected-service-card";
@@ -43,6 +43,12 @@ export function BookingScreen({ serviceId }: BookingScreenProps) {
   } = useServices();
 
   const {
+    workingDays,
+    isLoading: isScheduleLoading,
+    error: scheduleError,
+  } = useWorkingDays();
+
+  const {
     scrollViewRef: bookingScrollViewRef,
     handleSectionLayout: handleBookingSummaryLayout,
     scrollToSection: scrollToBookingSummary,
@@ -51,7 +57,14 @@ export function BookingScreen({ serviceId }: BookingScreenProps) {
   const [isCreatingAppointment, setIsCreatingAppointment] = useState(false);
   const [isConfirmationVisible, setIsConfirmationVisible] = useState(false);
 
-  const bookingDates = useMemo(() => createBookingDates(7), []);
+  const bookingDates = useMemo(
+  () =>
+    createBookingDates(
+      workingDays,
+      7,
+    ),
+  [workingDays],
+);
   const [selectedDateId, setSelectedDateId] = useState(
     bookingDates[0]?.id ?? "",
   );
@@ -79,6 +92,24 @@ export function BookingScreen({ serviceId }: BookingScreenProps) {
   const selectedTime = timeSlots.find(
     (timeSlot) => timeSlot.id === selectedTimeId,
   );
+
+  useEffect(() => {
+    const selectedDateStillExists =
+      bookingDates.some(
+        (date) =>
+          date.id === selectedDateId,
+      );
+
+    if (
+      !selectedDateStillExists &&
+      bookingDates[0]
+    ) {
+      setSelectedDateId(
+        bookingDates[0].id,
+      );
+      setSelectedTimeId("");
+    }
+  }, [bookingDates, selectedDateId]);
 
   const handleSelectDate = (dateId: string) => {
     setSelectedDateId(dateId);
@@ -143,7 +174,7 @@ export function BookingScreen({ serviceId }: BookingScreenProps) {
     }
   };
 
-  if (areServicesLoading) {
+  if (areServicesLoading || isScheduleLoading) {
     return (
       <SafeAreaScreen>
         <View style={styles.stateContainer}>
@@ -156,12 +187,12 @@ export function BookingScreen({ serviceId }: BookingScreenProps) {
     );
   }
 
-  if (servicesError) {
+  if (servicesError || scheduleError) {
     return (
       <SafeAreaScreen>
         <View style={styles.stateContainer}>
           <Text style={styles.stateMessage}>
-            Shërbimi nuk mund të ngarkohet.
+            Të dhënat e rezervimit nuk mund të ngarkohen.
           </Text>
 
           <Pressable
