@@ -3,6 +3,7 @@ import {
   Text,
   View,
 } from "react-native";
+import { useTranslation } from "@/features/localization/hooks/use-translation";
 
 import type { Appointment } from "../types/appointment";
 import { styles } from "./upcoming-appointment-card.styles";
@@ -22,16 +23,17 @@ function capitalize(value:string){
 }
 
 export function UpcomingAppointmentCard({appointment,onEdit,onCancel}:UpcomingAppointmentCardProps){
+    const { locale, serviceName, t } = useTranslation();
     const startsAt = new Date(appointment.startsAt);
 
-    const timeLabel = new Intl.DateTimeFormat("sq-AL",{
+    const timeLabel = new Intl.DateTimeFormat(locale,{
         hour:"2-digit",
         minute:"2-digit",
         hour12:false,
     }).format(startsAt);
 
     const dateLabel = capitalize(
-        new Intl.DateTimeFormat("sq-AL", {
+        new Intl.DateTimeFormat(locale, {
         weekday: "long",
         day: "numeric",
         month: "long",
@@ -39,14 +41,14 @@ export function UpcomingAppointmentCard({appointment,onEdit,onCancel}:UpcomingAp
     );
 
     const serviceLabel = [
-        appointment.serviceName,
+        serviceName(appointment.serviceName),
         `€${appointment.price}`,
     ].join(" · ");
 
     return (
         <View style={styles.container}>
             <Text style={styles.eyebrow}>
-                Termini yt i radhës
+                {t("appointments.next")}
             </Text>
 
             <View style={styles.appointmentDetails}>
@@ -77,7 +79,7 @@ export function UpcomingAppointmentCard({appointment,onEdit,onCancel}:UpcomingAp
                 pressed && styles.actionButtonPressed,
                 ]}
             >
-                <Text style={styles.actionText}>Ndrysho</Text>
+                <Text style={styles.actionText}>{t("common.change")}</Text>
             </View>
             )}
         </Pressable>
@@ -90,7 +92,7 @@ export function UpcomingAppointmentCard({appointment,onEdit,onCancel}:UpcomingAp
                 pressed && styles.actionButtonPressed,
                 ]}
             >
-                <Text style={styles.actionText}>Anulo</Text>
+                <Text style={styles.actionText}>{t("common.cancel")}</Text>
             </View>
             )}
         </Pressable>
@@ -98,4 +100,3 @@ export function UpcomingAppointmentCard({appointment,onEdit,onCancel}:UpcomingAp
     </View>
     )
 }
-

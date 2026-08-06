@@ -2,7 +2,7 @@ import { Pressable, Text, View } from "react-native";
 
 import { styles } from "./language-toggle.styles";
 
-export type AppLanguage = "sq" | "en";
+import type { AppLanguage } from "@/features/localization/types/app-language";
 
 type LanguageToggleProps = {
     value: AppLanguage;

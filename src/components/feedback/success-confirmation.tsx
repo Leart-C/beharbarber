@@ -10,6 +10,7 @@ import {
 } from "react";
 
 import { styles } from "./success-confirmation.styles";
+import { useTranslation } from "@/features/localization/hooks/use-translation";
 
 type SuccessConfirmationProps = {
   visible: boolean;
@@ -24,6 +25,7 @@ export function SuccessConfirmation({
   message,
   onFinished,
 }: SuccessConfirmationProps) {
+  const { t } = useTranslation();
   const overlayOpacity = useRef(
     new Animated.Value(0),
   ).current;
@@ -159,7 +161,7 @@ export function SuccessConfirmation({
           ) : null}
 
           <Text style={styles.happyMessage}>
-            Shihemi së shpejti!
+            {t("feedback.seeYouSoon")}
           </Text>
         </Animated.View>
       </Animated.View>

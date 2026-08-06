@@ -1,4 +1,5 @@
 import { Pressable, Text, View } from "react-native";
+import { useTranslation } from "@/features/localization/hooks/use-translation";
 
 import type { BookingTimeSlot } from "../types/booking-time-slot";
 import { styles } from "./time-slot-selector.styles";
@@ -14,15 +15,16 @@ export function TimeSlotSelector({
   selectedTimeId,
   onSelectTime,
 }: TimeSlotSelectorProps) {
+  const { t } = useTranslation();
   return (
     <View>
-      <Text style={styles.title}>Zgjidh orën</Text>
+      <Text style={styles.title}>{t("booking.selectTime")}</Text>
 
       <View style={styles.availabilityHint}>
         <View style={styles.hintLine} />
 
         <Text style={styles.hintText}>
-          Orari me vijë nuk është i disponueshëm
+          {t("booking.unavailableHint")}
         </Text>
       </View>
 
@@ -39,7 +41,7 @@ export function TimeSlotSelector({
                 selected: isSelected,
                 disabled: !timeSlot.isAvailable,
               }}
-              accessibilityLabel={`Ora ${timeSlot.label}`}
+              accessibilityLabel={t("booking.timeAccessibility", { time: timeSlot.label })}
               disabled={!timeSlot.isAvailable}
               onPress={() => onSelectTime(timeSlot)}
               style={styles.timePressable}

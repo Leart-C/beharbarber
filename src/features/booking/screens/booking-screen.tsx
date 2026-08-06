@@ -19,6 +19,7 @@ import { useScrollToSection } from "@/hooks/use-scroll-to-section";
 import { ApiError } from "@/lib/api/api-client";
 import { brandColors } from "@/theme/colors";
 import { useWorkingDays } from "@/features/schedule/hooks/use-working-days";
+import { useTranslation } from "@/features/localization/hooks/use-translation";
 import { BookingSummary } from "../components/booking-summary";
 import { DateSelector } from "../components/date-selector";
 import { SelectedServiceCard } from "../components/selected-service-card";
@@ -32,6 +33,7 @@ type BookingScreenProps = {
 };
 
 export function BookingScreen({ serviceId }: BookingScreenProps) {
+  const { language, serviceName, t } = useTranslation();
   const { addAppointment } = useAppointments();
   const { authenticatedRequest } = useAuthenticatedApi();
 
@@ -62,8 +64,9 @@ export function BookingScreen({ serviceId }: BookingScreenProps) {
     createBookingDates(
       workingDays,
       7,
+      language,
     ),
-  [workingDays],
+  [language, workingDays],
 );
   const [selectedDateId, setSelectedDateId] = useState(
     bookingDates[0]?.id ?? "",
@@ -159,15 +162,15 @@ export function BookingScreen({ serviceId }: BookingScreenProps) {
 
       if (error instanceof ApiError && error.status === 409) {
         Alert.alert(
-          "Orari nuk është i disponueshëm",
+          t("booking.unavailableTitle"),
           error.message,
         );
         return;
       }
 
       Alert.alert(
-        "Rezervimi dështoi",
-        "Nuk mundëm ta konfirmojmë rezervimin. Provo përsëri.",
+        t("booking.failedTitle"),
+        t("booking.failedMessage"),
       );
     } finally {
       setIsCreatingAppointment(false);
@@ -180,7 +183,7 @@ export function BookingScreen({ serviceId }: BookingScreenProps) {
         <View style={styles.stateContainer}>
           <ActivityIndicator size="large" color={brandColors.blue} />
           <Text style={styles.stateMessage}>
-            Duke ngarkuar shërbimin...
+            {t("booking.loading")}
           </Text>
         </View>
       </SafeAreaScreen>
@@ -192,14 +195,14 @@ export function BookingScreen({ serviceId }: BookingScreenProps) {
       <SafeAreaScreen>
         <View style={styles.stateContainer}>
           <Text style={styles.stateMessage}>
-            Të dhënat e rezervimit nuk mund të ngarkohen.
+            {t("booking.loadError")}
           </Text>
 
           <Pressable
             onPress={() => router.back()}
             style={styles.backButton}
           >
-            <Text style={styles.backButtonText}>Kthehu</Text>
+            <Text style={styles.backButtonText}>{t("common.back")}</Text>
           </Pressable>
         </View>
       </SafeAreaScreen>
@@ -210,13 +213,13 @@ export function BookingScreen({ serviceId }: BookingScreenProps) {
     return (
       <SafeAreaScreen>
         <View style={styles.stateContainer}>
-          <Text style={styles.title}>Shërbimi nuk u gjet</Text>
+          <Text style={styles.title}>{t("booking.serviceNotFound")}</Text>
 
           <Pressable
             onPress={() => router.back()}
             style={styles.backButton}
           >
-            <Text style={styles.backButtonText}>Kthehu</Text>
+            <Text style={styles.backButtonText}>{t("common.back")}</Text>
           </Pressable>
         </View>
       </SafeAreaScreen>
@@ -234,11 +237,11 @@ export function BookingScreen({ serviceId }: BookingScreenProps) {
           onPress={() => router.back()}
           style={styles.backLink}
         >
-          <Text style={styles.backLinkText}>‹ Kthehu</Text>
+          <Text style={styles.backLinkText}>‹ {t("common.back")}</Text>
         </Pressable>
 
-        <Text style={styles.eyebrow}>REZERVO TERMININ</Text>
-        <Text style={styles.title}>Zgjidh datën dhe orën</Text>
+        <Text style={styles.eyebrow}>{t("booking.eyebrow")}</Text>
+        <Text style={styles.title}>{t("booking.title")}</Text>
 
         <View style={styles.selectedService}>
           <SelectedServiceCard
@@ -261,19 +264,19 @@ export function BookingScreen({ serviceId }: BookingScreenProps) {
             <View style={styles.availabilityState}>
               <ActivityIndicator color={brandColors.blue} />
               <Text style={styles.availabilityMessage}>
-                Duke kontrolluar oraret...
+                {t("booking.availabilityChecking")}
               </Text>
             </View>
           ) : availabilityError ? (
             <View style={styles.availabilityState}>
               <Text style={styles.availabilityMessage}>
-                Oraret nuk mund të ngarkohen.
+                {t("booking.availabilityError")}
               </Text>
             </View>
           ) : timeSlots.length === 0 ? (
             <View style={styles.availabilityState}>
               <Text style={styles.availabilityMessage}>
-                Nuk ka orare të disponueshme për këtë ditë.
+                {t("booking.noAvailability")}
               </Text>
             </View>
           ) : (
@@ -303,10 +306,10 @@ export function BookingScreen({ serviceId }: BookingScreenProps) {
 
       <SuccessConfirmation
         visible={isConfirmationVisible}
-        title="Rezervimi u konfirmua!"
+        title={t("booking.confirmationTitle")}
         message={
           selectedDate && selectedTime
-            ? `${service.name} · ${selectedDate.compactWeekdayLabel}, ${selectedDate.dayLabel} ${selectedDate.monthLabel} · ${selectedTime.label}`
+            ? `${serviceName(service.name)} · ${selectedDate.compactWeekdayLabel}, ${selectedDate.dayLabel} ${selectedDate.monthLabel} · ${selectedTime.label}`
             : undefined
         }
         onFinished={() => {

@@ -8,6 +8,7 @@ import {
 
 import { ConfirmationDialog } from "@/components/feedback/confirmation-dialog";
 import { SafeAreaScreen } from "@/components/layout/safe-area-screen";
+import { useTranslation } from "@/features/localization/hooks/use-translation";
 
 import { AppointmentCard } from "../components/appointment-card";
 import { useAppointments } from "../hooks/use-appointments";
@@ -16,6 +17,7 @@ import { styles } from "./appointments-screen.styles";
 import { router } from "expo-router";
 
 export function AppointmentsScreen() {
+  const { serviceName, t } = useTranslation();
   const {
     appointments,
     cancelAppointment,
@@ -58,8 +60,8 @@ export function AppointmentsScreen() {
       );
 
       Alert.alert(
-        "Anulimi dështoi",
-        "Nuk mundëm ta anulonim terminin. Provo përsëri.",
+        t("home.cancellationFailedTitle"),
+        t("home.cancellationFailedMessage"),
       );
     }
   };
@@ -73,12 +75,12 @@ export function AppointmentsScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.content}
       >
-        <Text style={styles.title}>Terminet</Text>
+        <Text style={styles.title}>{t("appointments.title")}</Text>
 
         <Text style={styles.subtitle}>
           {appointments.length === 1
-            ? "1 termin i rezervuar"
-            : `${appointments.length} termine të rezervuara`}
+            ? t("appointments.countOne")
+            : t("appointments.countMany", { count: appointments.length })}
         </Text>
 
         {sortedAppointments.length > 0 ? (
@@ -100,26 +102,25 @@ export function AppointmentsScreen() {
             </View>
 
             <Text style={styles.emptyTitle}>
-              Nuk ke termine
+              {t("appointments.emptyTitle")}
             </Text>
 
             <Text style={styles.emptyDescription}>
-              Zgjidh një shërbim nga Ballina për të
-              rezervuar terminin tënd.
+              {t("appointments.emptyDescription")}
             </Text>
           </View>
         )}
       </ScrollView>
       <ConfirmationDialog
         visible={appointmentToCancel !== null}
-        title="Anulo terminin?"
+        title={t("home.cancellationTitle")}
         message={
           appointmentToCancel
-            ? `A je i sigurt që dëshiron të anulosh ${appointmentToCancel.serviceName}?`
+            ? t("home.cancellationMessage", { name: serviceName(appointmentToCancel.serviceName) })
             : ""
         }
-        confirmLabel="Anulo"
-        cancelLabel="Jo"
+        confirmLabel={t("common.cancel")}
+        cancelLabel={t("common.no")}
         variant="destructive"
         isLoading={isCancelling}
         onCancel={() => {
@@ -132,4 +133,3 @@ export function AppointmentsScreen() {
     </SafeAreaScreen>
   );
 }
-

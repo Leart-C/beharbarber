@@ -4,6 +4,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import type { ReactNode } from "react";
 import { View, Text } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTranslation } from "@/features/localization/hooks/use-translation";
 
 import {
   homeHeaderGradient,
@@ -19,8 +20,9 @@ export function HomeHeader({
 }: HomeHeaderProps) {
   const { user } = useUser();
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
 
-  const firstName = user?.firstName ?? "Mik";
+  const firstName = user?.firstName ?? t("home.guest");
 
   return (
     <View style={styles.container}>
@@ -48,7 +50,7 @@ export function HomeHeader({
       >
         <View style={styles.greetingContainer}>
           <Text style={styles.greeting}>
-            Përshëndetje,
+            {t("home.greeting")}
           </Text>
 
           <Text

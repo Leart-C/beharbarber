@@ -7,12 +7,12 @@ import {
   useState,
 } from "react";
 import { Platform } from "react-native";
+import { useTranslation } from "@/features/localization/hooks/use-translation";
 
 WebBrowser.maybeCompleteAuthSession();
 
-const GOOGLE_SIGN_IN_ERROR = "Hyrja me Google dështoi. Provo përsëri.";
-
 export function useGoogleSignIn(){
+    const { t } = useTranslation();
     const {startSSOFlow} = useSSO();
 
     const [isLoading, setIsLoading] = useState(false);
@@ -75,11 +75,11 @@ export function useGoogleSignIn(){
             });
         } catch (error) {
             console.error("Google sign-in failed:", error);
-            setErrorMessage(GOOGLE_SIGN_IN_ERROR);
+            setErrorMessage(t("auth.googleError"));
         }finally{
             setIsLoading(false);
         }
-    },[isLoading,startSSOFlow]);
+    },[isLoading,startSSOFlow,t]);
 
     return {
         signInWithGoogle,

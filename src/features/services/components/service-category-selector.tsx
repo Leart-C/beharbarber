@@ -1,4 +1,5 @@
 import { Pressable, Text, View } from "react-native";
+import { useTranslation } from "@/features/localization/hooks/use-translation";
 
 import type {
   ServiceCategory,
@@ -13,18 +14,21 @@ type ServiceCategorySelectrProps = {
 }
 
 export function ServiceCategorySelector({categories,selectedCategoryId,onSelectCategory}:ServiceCategorySelectrProps){
+    const { t } = useTranslation();
     return(
         <View>
-            <Text style={styles.heading}>Kategoritë</Text>
+            <Text style={styles.heading}>{t("serviceCategories.heading")}</Text>
 
             <View style={styles.categories}>
                 {categories.map((category)=>{
                     const isSelected = category.id === selectedCategoryId;
+                    const categoryLabel = t(`serviceCategories.${category.id}`);
 
                     return(
                         <Pressable
                             key={category.id}
                             accessibilityRole="button"
+                            accessibilityLabel={categoryLabel}
                             accessibilityState={{selected: isSelected}}
                             onPress={()=>onSelectCategory(category.id)}
                             style={styles.categoryPressable}
@@ -52,7 +56,7 @@ export function ServiceCategorySelector({categories,selectedCategoryId,onSelectC
                                             isSelected && styles.selectedText,
                                         ]}
                                     >
-                                        {category.label}
+                                        {categoryLabel}
                                     </Text>
                                 </View>
                             )}

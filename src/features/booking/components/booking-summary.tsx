@@ -1,6 +1,7 @@
 import { Text, View } from "react-native";
 
 import type { BarberService } from "@/features/services/types/service";
+import { useTranslation } from "@/features/localization/hooks/use-translation";
 
 import type { BookingDate } from "../types/booking-date";
 import type { BookingTimeSlot } from "../types/booking-time-slot";
@@ -17,34 +18,35 @@ type BookingSummaryProps = {
 }
 
 export function BookingSummary({service,selectedDate,selectedTime,onConfirm,isConfirming=false}:BookingSummaryProps){
+    const { serviceName, t } = useTranslation();
     const canConfirm = selectedDate !== undefined && selectedTime !== undefined;
 
     const dateLabel = selectedDate
-    ? `${selectedDate.compactWeekdayLabel}, ${selectedDate.dayLabel} ${selectedDate.monthLabel}` : "Zgjidh daten";
+    ? `${selectedDate.compactWeekdayLabel}, ${selectedDate.dayLabel} ${selectedDate.monthLabel}` : t("booking.selectDate");
 
-    const timeLabel = selectedTime?.label ?? "Zgjidh oren";
+    const timeLabel = selectedTime?.label ?? t("booking.selectTime");
 
     return (
         <View>
             <Text style={styles.title}>
-                Përmbledhja
+                {t("booking.summary")}
             </Text>
 
             <View style={styles.card}>
                 <View style={styles.row}>
                     <Text style={styles.rowLabel}>
-                        Shërbimi
+                        {t("booking.service")}
                     </Text>
 
                     <Text style={styles.rowValue}>
-                        {service.name}
+                        {serviceName(service.name)}
                     </Text>
                 </View>
 
                 <View style={styles.divider}/>
 
                 <View style={styles.row}>
-                    <Text style={styles.rowLabel}>Data</Text>
+                    <Text style={styles.rowLabel}>{t("booking.date")}</Text>
 
                     <Text style={styles.rowValue}>
                         {dateLabel}
@@ -54,7 +56,7 @@ export function BookingSummary({service,selectedDate,selectedTime,onConfirm,isCo
                 <View style={styles.divider}/>
 
                 <View style={styles.row}>
-                    <Text style={styles.rowLabel}>Ora</Text>
+                    <Text style={styles.rowLabel}>{t("booking.time")}</Text>
 
                     <Text style={styles.rowValue}>
                         {timeLabel}
@@ -65,7 +67,7 @@ export function BookingSummary({service,selectedDate,selectedTime,onConfirm,isCo
 
                     <View style={styles.row}>
                     <Text style={styles.rowLabel}>
-                        Kohëzgjatja
+                        {t("common.duration")}
                     </Text>
 
                     <Text style={styles.rowValue}>
@@ -77,7 +79,7 @@ export function BookingSummary({service,selectedDate,selectedTime,onConfirm,isCo
 
                     <View style={styles.row}>
                     <Text style={styles.totalLabel}>
-                        Totali
+                        {t("booking.total")}
                     </Text>
 
                     <Text style={styles.totalValue}>

@@ -3,8 +3,10 @@ import { Redirect } from "expo-router";
 import { NativeTabs } from "expo-router/unstable-native-tabs";
 
 import { brandColors } from "@/theme/colors";
+import { useTranslation } from "@/features/localization/hooks/use-translation";
 
 export default function TabsLayout(){
+  const { t } = useTranslation();
   const {isLoaded, isSignedIn} = useAuth({
     treatPendingAsSignedOut: false,
   });
@@ -30,7 +32,7 @@ export default function TabsLayout(){
         />
       
         <NativeTabs.Trigger.Label>
-          Ballina
+          {t("tabs.home")}
         </NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
 
@@ -43,7 +45,7 @@ export default function TabsLayout(){
           md="calendar_month"
         />
         <NativeTabs.Trigger.Label>
-          Terminet
+          {t("tabs.appointments")}
         </NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
 
@@ -57,7 +59,7 @@ export default function TabsLayout(){
         />
 
         <NativeTabs.Trigger.Label>
-          Profili
+          {t("tabs.profile")}
         </NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
     </NativeTabs>

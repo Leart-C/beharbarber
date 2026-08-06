@@ -1,4 +1,5 @@
 import { Pressable, Text, View } from "react-native";
+import { useTranslation } from "@/features/localization/hooks/use-translation";
 
 import type { BarberService } from "../types/service";
 import { styles } from "./service-card.styles";
@@ -10,10 +11,12 @@ type ServiceCardProps = {
 };
 
 export function ServiceCard({service,symbol,onAdd}:ServiceCardProps){
+    const { serviceName, t } = useTranslation();
+    const localizedName = serviceName(service.name);
     return (
         <Pressable
             accessibilityRole="button"
-            accessibilityLabel={`Zgjidh ${service.name}`}
+            accessibilityLabel={t("services.select", { name: localizedName })}
             onPress={() => onAdd(service)}
             style={styles.cardPressable}
         >
@@ -29,7 +32,7 @@ export function ServiceCard({service,symbol,onAdd}:ServiceCardProps){
                 </View>
 
                 <View style={styles.information}>
-                <Text style={styles.name}>{service.name}</Text>
+                <Text style={styles.name}>{localizedName}</Text>
 
                 <Text style={styles.details}>
                     {service.durationMinutes} min

@@ -1,39 +1,58 @@
 import { useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   ScrollView,
-  View,
-  ActivityIndicator,
   Text,
+  View,
 } from "react-native";
-
-import { SafeAreaScreen } from "@/components/layout/safe-area-screen";
-import { UpcomingAppointmentCard } from "@/features/appointments/components/upcoming-appointment-card";
-import { BarberAlert } from "../components/barber-alert";
-import { HomeHeader } from "../components/home-header";
-import {type AppLanguage,LanguageToggle,} from "../components/language-toggle";
-import { styles } from "./home-screen.styles";
-import { ServiceCategorySelector } from "@/features/services/components/service-category-selector";
-import type { ServiceCategoryId } from "@/features/services/types/service-category";
-import { ServiceList } from "@/features/services/components/service-list";
-import { useScrollToSection } from "@/hooks/use-scroll-to-section";
-import { ConfirmationDialog } from "@/components/feedback/confirmation-dialog";
-import { useAppointments } from "@/features/appointments/hooks/use-appointments";
-import { useNextAppointment } from "@/features/appointments/hooks/use-next-appointment";
-import { useServices } from "@/features/services/hooks/use-services";
-import type { Appointment } from "@/features/appointments/types/appointment";
-import { useCurrentAnnouncement } from "@/features/announcements/hooks/use-current-announcement";
 import { router } from "expo-router";
 
+import { ConfirmationDialog } from "@/components/feedback/confirmation-dialog";
+import { SafeAreaScreen } from "@/components/layout/safe-area-screen";
+import { useCurrentAnnouncement } from "@/features/announcements/hooks/use-current-announcement";
+import { UpcomingAppointmentCard } from "@/features/appointments/components/upcoming-appointment-card";
+import { useAppointments } from "@/features/appointments/hooks/use-appointments";
+import { useNextAppointment } from "@/features/appointments/hooks/use-next-appointment";
+import type { Appointment } from "@/features/appointments/types/appointment";
+import { useTranslation } from "@/features/localization/hooks/use-translation";
+import { ServiceCategorySelector } from "@/features/services/components/service-category-selector";
+import { ServiceList } from "@/features/services/components/service-list";
+import { useServices } from "@/features/services/hooks/use-services";
+import type { ServiceCategoryId } from "@/features/services/types/service-category";
+import { useScrollToSection } from "@/hooks/use-scroll-to-section";
+
+import { BarberAlert } from "../components/barber-alert";
+import { HomeHeader } from "../components/home-header";
+import { LanguageToggle } from "../components/language-toggle";
+import { styles } from "./home-screen.styles";
 
 export function HomeScreen() {
-  const { cancelAppointment,cancellingAppointmentId, } = useAppointments();
+  const {
+    cancelAppointment,
+    cancellingAppointmentId,
+  } = useAppointments();
 
   const nextAppointment = useNextAppointment();
-  const [appointmentToCancel,setAppointmentToCancel] = useState<Appointment | null>(null);
-  const isCancelling = appointmentToCancel?.id === cancellingAppointmentId;
+  const { announcement } = useCurrentAnnouncement();
+  const { language, serviceName, setLanguage, t } = useTranslation();
 
-  const {categories,services,isLoading: areServicesLoading,error: servicesError} = useServices()
+  const {
+    categories,
+    services,
+    isLoading: areServicesLoading,
+    error: servicesError,
+  } = useServices();
+
+  const [appointmentToCancel, setAppointmentToCancel] =
+    useState<Appointment | null>(null);
+  const [dismissedAnnouncementId, setDismissedAnnouncementId] =
+    useState<string | null>(null);
+  const [selectedCategoryId, setSelectedCategoryId] =
+    useState<ServiceCategoryId>("haircut");
+
+  const isCancelling =
+    appointmentToCancel?.id === cancellingAppointmentId;
 
   const {
     scrollViewRef: homeScrollViewRef,
@@ -42,13 +61,6 @@ export function HomeScreen() {
   } = useScrollToSection({
     offset: 20,
   });
-
-  const [language, setLanguage] = useState<AppLanguage>("sq");
-
-  const { announcement } = useCurrentAnnouncement();
-
-  const [dismissedAnnouncementId, setDismissedAnnouncementId] =
-    useState<string | null>(null);
 
   const announcementMessage = announcement
     ? language === "en"
@@ -60,23 +72,21 @@ export function HomeScreen() {
     announcement !== null &&
     announcement.id !== dismissedAnnouncementId;
 
-  const [selectedCategoryId,setSelectedCategoryId] = useState<ServiceCategoryId>("haircut");
-
   const selectedCategory = categories.find(
     (category) => category.id === selectedCategoryId,
   );
 
   const filteredServices = services.filter(
-    (service) => service.categoryId === selectedCategoryId,
+    (service) =>
+      service.categoryId === selectedCategoryId,
   );
 
   const handleEditAppointment = () => {
     Alert.alert(
-      "Ndrysho terminin",
-      "Ndryshimi i terminit do të ndërtohet në hapin e rezervimeve.",
+      t("home.editAppointmentTitle"),
+      t("home.editAppointmentMessage"),
     );
   };
-
 
   const handleSelectCategory = (
     categoryId: ServiceCategoryId,
@@ -85,20 +95,13 @@ export function HomeScreen() {
     scrollToServiceList();
   };
 
-  const handleConfirmCancellation =
-  async () => {
-    if (
-      !appointmentToCancel ||
-      isCancelling
-    ) {
+  const handleConfirmCancellation = async () => {
+    if (!appointmentToCancel || isCancelling) {
       return;
     }
 
     try {
-      await cancelAppointment(
-        appointmentToCancel.id,
-      );
-
+      await cancelAppointment(appointmentToCancel.id);
       setAppointmentToCancel(null);
     } catch (error) {
       console.error(
@@ -107,8 +110,8 @@ export function HomeScreen() {
       );
 
       Alert.alert(
-        "Anulimi dështoi",
-        "Nuk mundëm ta anulonim terminin. Provo përsëri.",
+        t("home.cancellationFailedTitle"),
+        t("home.cancellationFailedMessage"),
       );
     }
   };
@@ -133,10 +136,15 @@ export function HomeScreen() {
         />
 
         <View style={styles.content}>
-          {shouldShowAnnouncement && announcementMessage ? (
+          {shouldShowAnnouncement &&
+          announcementMessage ? (
             <BarberAlert
               message={announcementMessage}
-              onDismiss={() => setDismissedAnnouncementId(announcement.id)}
+              onDismiss={() =>
+                setDismissedAnnouncementId(
+                  announcement.id,
+                )
+              }
             />
           ) : null}
 
@@ -144,46 +152,58 @@ export function HomeScreen() {
             <UpcomingAppointmentCard
               appointment={nextAppointment}
               onEdit={handleEditAppointment}
-              onCancel={() => {
-                setAppointmentToCancel(nextAppointment);
-              }}
+              onCancel={() =>
+                setAppointmentToCancel(
+                  nextAppointment,
+                )
+              }
             />
           ) : null}
 
           {areServicesLoading ? (
-          <View style={styles.serviceState}>
+            <View style={styles.serviceState}>
               <ActivityIndicator color="#4E84E5" />
 
               <Text style={styles.serviceStateText}>
-                Duke ngarkuar shërbimet...
+                {t("home.loadingServices")}
               </Text>
             </View>
           ) : servicesError ? (
             <View style={styles.serviceState}>
               <Text style={styles.serviceStateText}>
-                Shërbimet nuk mund të ngarkohen.
+                {t("home.servicesError")}
               </Text>
             </View>
           ) : (
             <>
               <ServiceCategorySelector
                 categories={categories}
-                selectedCategoryId={selectedCategoryId}
-                onSelectCategory={handleSelectCategory}
+                selectedCategoryId={
+                  selectedCategoryId
+                }
+                onSelectCategory={
+                  handleSelectCategory
+                }
               />
 
-              <View style={styles.servicesList} onLayout={handleServiceListLayout}
+              <View
+                style={styles.servicesList}
+                onLayout={handleServiceListLayout}
               >
                 <ServiceList
                   title={
-                    selectedCategory?.label ??
-                    "Shërbimet"
+                    selectedCategory
+                      ? t(`serviceCategories.${selectedCategory.id}`)
+                      : t("home.services")
                   }
-                  symbol={selectedCategory?.symbol ?? ""}
+                  symbol={
+                    selectedCategory?.symbol ?? ""
+                  }
                   services={filteredServices}
                   onAddService={(service) => {
                     router.push({
-                      pathname: "/booking/[serviceId]",
+                      pathname:
+                        "/booking/[serviceId]",
                       params: {
                         serviceId: service.id,
                       },
@@ -195,16 +215,19 @@ export function HomeScreen() {
           )}
         </View>
       </ScrollView>
+
       <ConfirmationDialog
         visible={appointmentToCancel !== null}
-        title="Anulo terminin?"
+        title={t("home.cancellationTitle")}
         message={
           appointmentToCancel
-            ? `A je i sigurt që dëshiron të anulosh ${appointmentToCancel.serviceName}?`
+            ? t("home.cancellationMessage", {
+                name: serviceName(appointmentToCancel.serviceName),
+              })
             : ""
         }
-        confirmLabel="Anulo"
-        cancelLabel="Jo"
+        confirmLabel={t("common.cancel")}
+        cancelLabel={t("common.no")}
         variant="destructive"
         isLoading={isCancelling}
         onCancel={() => {
@@ -213,7 +236,7 @@ export function HomeScreen() {
           }
         }}
         onConfirm={handleConfirmCancellation}
-      />  
+      />
     </SafeAreaScreen>
   );
 }

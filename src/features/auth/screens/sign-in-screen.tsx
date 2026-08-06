@@ -5,9 +5,11 @@ import { ScrollView, View, Text } from "react-native";
 import { BarberBrand } from "../components/barber-brand";
 import { styles } from "./sign-in-screen.styles";
 import { GoogleSignInButton } from "../components/google-sign-in-button";
+import { useTranslation } from "@/features/localization/hooks/use-translation";
 
 
 export function SignInScreen(){
+    const { t } = useTranslation();
     const {
         signInWithGoogle,
         isLoading,
@@ -42,7 +44,7 @@ export function SignInScreen(){
                                 ):null}
 
                                 <Text style={styles.attribution}>
-                                    SignIn from{" "}
+                                    {t("auth.attribution")}{" "}
                                     <Text style={styles.attributionBrand}>
                                         Clerk
                                     </Text>

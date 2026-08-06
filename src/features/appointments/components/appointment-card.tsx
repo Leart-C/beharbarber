@@ -1,4 +1,5 @@
 import { Pressable, Text, View } from "react-native";
+import { useTranslation } from "@/features/localization/hooks/use-translation";
 
 import type { Appointment } from "../types/appointment";
 import { styles } from "./appointment-card.styles";
@@ -20,27 +21,28 @@ export function AppointmentCard({
   appointment,
   onCancel,
 }: AppointmentCardProps) {
+  const { locale, serviceName, t } = useTranslation();
   const startsAt = new Date(appointment.startsAt);
 
-  const weekday = new Intl.DateTimeFormat("sq-AL", {
+  const weekday = new Intl.DateTimeFormat(locale, {
     weekday: "long",
   }).format(startsAt);
 
   const compactWeekday = capitalizeFirst(
-    weekday.replace(/^e\s+/i, ""),
+    locale === "sq-AL" ? weekday.replace(/^e\s+/i, "") : weekday,
   );
 
-  const day = new Intl.DateTimeFormat("sq-AL", {
+  const day = new Intl.DateTimeFormat(locale, {
     day: "numeric",
   }).format(startsAt);
 
   const month = capitalizeFirst(
-    new Intl.DateTimeFormat("sq-AL", {
+    new Intl.DateTimeFormat(locale, {
       month: "long",
     }).format(startsAt),
   );
 
-  const time = new Intl.DateTimeFormat("sq-AL", {
+  const time = new Intl.DateTimeFormat(locale, {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
@@ -55,7 +57,7 @@ export function AppointmentCard({
 
         <View style={styles.status}>
           <Text style={styles.statusText}>
-            I ardhshëm
+            {t("appointments.upcoming")}
           </Text>
         </View>
       </View>
@@ -65,7 +67,7 @@ export function AppointmentCard({
 
         <View style={styles.serviceInformation}>
           <Text style={styles.serviceName}>
-            {appointment.serviceName}
+            {serviceName(appointment.serviceName)}
           </Text>
 
           <Text style={styles.duration}>
@@ -78,7 +80,7 @@ export function AppointmentCard({
 
       <View style={styles.footer}>
         <View>
-          <Text style={styles.priceLabel}>Çmimi</Text>
+          <Text style={styles.priceLabel}>{t("common.price")}</Text>
 
           <Text style={styles.price}>
             €{appointment.price}
@@ -87,7 +89,7 @@ export function AppointmentCard({
 
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={`Anulo ${appointment.serviceName}`}
+          accessibilityLabel={t("appointments.cancelAccessibility", { name: serviceName(appointment.serviceName) })}
           onPress={onCancel}
           style={styles.cancelPressable}
         >
@@ -99,7 +101,7 @@ export function AppointmentCard({
               ]}
             >
               <Text style={styles.cancelButtonText}>
-                Anulo
+                {t("common.cancel")}
               </Text>
             </View>
           )}

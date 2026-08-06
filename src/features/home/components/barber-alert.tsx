@@ -5,6 +5,7 @@ import {
 } from "react-native";
 
 import { styles } from "./barber-alert.styles";
+import { useTranslation } from "@/features/localization/hooks/use-translation";
 
 type BarberAlertProps = {
   message: string;
@@ -15,6 +16,7 @@ export function BarberAlert({
     message,
     onDismiss,
 }: BarberAlertProps){
+    const { t } = useTranslation();
     return(
         <View
             accessible
@@ -32,7 +34,7 @@ export function BarberAlert({
             {onDismiss ? (
                 <Pressable
                     accessibilityRole="button"
-                    accessibilityLabel="Mbyll njoftimin"
+                    accessibilityLabel={t("home.dismissAnnouncement")}
                     hitSlop={8}
                     onPress={onDismiss}
                     style={({pressed})=>[

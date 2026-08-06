@@ -7,6 +7,7 @@ import {
 
 import type { BookingDate } from "../types/booking-date";
 import { styles } from "./date-selector.styles";
+import { useTranslation } from "@/features/localization/hooks/use-translation";
 
 
 type DateSelectorProps ={
@@ -16,9 +17,10 @@ type DateSelectorProps ={
 };
 
 export function DateSelector({dates,selectedDateId,onSelectDate}: DateSelectorProps){
+    const { t } = useTranslation();
     return (
         <View>
-            <Text style={styles.title}>Zgjidh datën</Text>
+            <Text style={styles.title}>{t("booking.selectDate")}</Text>
 
             <ScrollView
                 horizontal
@@ -57,7 +59,7 @@ export function DateSelector({dates,selectedDateId,onSelectDate}: DateSelectorPr
                                         ]}
                                     >
                                         {date.isToday
-                                        ? "Sot"
+                                        ? t("booking.today")
                                         : date.compactWeekdayLabel}
                                     </Text>
 

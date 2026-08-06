@@ -1,4 +1,5 @@
 import type { BookingDate } from "../types/booking-date";
+import type { AppLanguage } from "@/features/localization/types/app-language";
 
 function createDateId(date: Date): string {
   const year = date.getFullYear();
@@ -26,6 +27,7 @@ function capitalizeFirst(value: string): string {
 export function createBookingDates(
   workingDays: number[],
   numberOfDays = 7,
+  language: AppLanguage = "sq",
 ): BookingDate[] {
   if (
     workingDays.length === 0 ||
@@ -38,6 +40,7 @@ export function createBookingDates(
     new Set(workingDays);
 
   const today = new Date();
+  const locale = language === "sq" ? "sq-AL" : "en-US";
   today.setHours(12, 0, 0, 0);
 
   const bookingDates: BookingDate[] = [];
@@ -61,7 +64,7 @@ export function createBookingDates(
     }
 
     const weekdayLabel = capitalizeFirst(
-      new Intl.DateTimeFormat("sq-AL", {
+      new Intl.DateTimeFormat(locale, {
         weekday: "long",
       }).format(date),
     );
@@ -79,7 +82,7 @@ export function createBookingDates(
         ),
       dayLabel:
         new Intl.DateTimeFormat(
-          "sq-AL",
+          locale,
           {
             day: "numeric",
           },
@@ -87,7 +90,7 @@ export function createBookingDates(
       monthLabel:
         capitalizeFirst(
           new Intl.DateTimeFormat(
-            "sq-AL",
+            locale,
             {
               month: "long",
             },

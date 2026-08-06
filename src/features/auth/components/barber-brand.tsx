@@ -1,12 +1,14 @@
 import { Text, View } from "react-native";
+import { useTranslation } from "@/features/localization/hooks/use-translation";
 
 import { styles } from "./barber-brand.styles";
 
 export function BarberBrand() {
+  const { t } = useTranslation();
   return (
     <View style={styles.container}>
       <Text style={styles.eyebrow}>
-        Qethja jote te
+        {t("auth.eyebrow")}
       </Text>
 
       <Text style={styles.title}>
@@ -19,7 +21,7 @@ export function BarberBrand() {
       </View>
 
       <Text style={styles.description}>
-        Rezervo termin për 30 sekonda — pa telefonata, pa pritje.
+        {t("auth.description")}
       </Text>
     </View>
   );

@@ -6,6 +6,7 @@ import {
 } from "react-native";
 
 import { brandColors } from "@/theme/colors";
+import { useTranslation } from "@/features/localization/hooks/use-translation";
 
 import { styles } from "./confirm-booking-button.styles";
 
@@ -16,12 +17,13 @@ type ConfirmBookingButtonProps={
 };
 
 export function ConfirmBookingButton({onPress,disabled=false,isLoading=false}:ConfirmBookingButtonProps){
+    const { t } = useTranslation();
     const isDisabled = disabled || isLoading;
 
     return (
         <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Konfirmo rezervimin"
+            accessibilityLabel={t("booking.confirm")}
             accessibilityState={{
                 disabled: isDisabled,
                 busy: isLoading,
@@ -46,7 +48,7 @@ export function ConfirmBookingButton({onPress,disabled=false,isLoading=false}:Co
                         />
                     ) : (
                         <Text style={styles.label}>
-                            Konfirmo rezervimin
+                            {t("booking.confirm")}
                         </Text>
                     )}
                 </View>

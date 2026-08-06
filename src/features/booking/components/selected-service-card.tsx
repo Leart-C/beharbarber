@@ -1,6 +1,7 @@
 import { Pressable, Text, View } from "react-native";
 
 import type { BarberService } from "@/features/services/types/service";
+import { useTranslation } from "@/features/localization/hooks/use-translation";
 
 import { styles } from "./selected-service-card.styles";
 
@@ -11,6 +12,7 @@ type SelectedServiceCardProps = {
 }
 
 export function SelectedServiceCard({service,symbol,onChange}: SelectedServiceCardProps){
+    const { serviceName, t } = useTranslation();
     return(
         <View style={styles.container}>
             <View style={styles.topRow}>
@@ -20,11 +22,11 @@ export function SelectedServiceCard({service,symbol,onChange}: SelectedServiceCa
 
                 <View style={styles.information}>
                     <Text style={styles.label}>
-                        SHËRBIMI I ZGJEDHUR
+                        {t("booking.selectedService")}
                     </Text>
 
                     <Text style={styles.name}>
-                        {service.name}
+                        {serviceName(service.name)}
                     </Text>
                 </View>
             </View>
@@ -34,7 +36,7 @@ export function SelectedServiceCard({service,symbol,onChange}: SelectedServiceCa
             <View style={styles.bottomRow}>
                 <View style={styles.serviceMeta}>
                     <Text style={styles.details}>
-                        Kohëzgjatja
+                        {t("common.duration")}
                     </Text>
 
                     <Text style={styles.metaValue}>
@@ -44,7 +46,7 @@ export function SelectedServiceCard({service,symbol,onChange}: SelectedServiceCa
 
                     <View style={styles.serviceMeta}>
                     <Text style={styles.details}>
-                        Çmimi
+                        {t("common.price")}
                     </Text>
 
                     <Text style={styles.metaValue}>
@@ -54,7 +56,7 @@ export function SelectedServiceCard({service,symbol,onChange}: SelectedServiceCa
 
                 <Pressable
                     accessibilityRole="button"
-                    accessibilityLabel="Ndrysho shërbimin"
+                    accessibilityLabel={t("booking.changeService")}
                     onPress={onChange}
                     style={styles.changePressable}
                 >
@@ -66,7 +68,7 @@ export function SelectedServiceCard({service,symbol,onChange}: SelectedServiceCa
                             ]}
                         >
                             <Text style={styles.changeButtonText}>
-                                Ndrysho
+                                {t("common.change")}
                             </Text>
                         </View>
                     )}
