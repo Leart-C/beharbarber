@@ -58,12 +58,12 @@ export function useAvailability({
       };
     }
 
+    setIsLoading(true);
+    setError(null);
+    setTimeSlots([]);
+
     async function loadAvailability() {
       try {
-        setIsLoading(true);
-        setError(null);
-        setTimeSlots([]);
-
         const response =
           await getAvailability({
             serviceId,
@@ -86,23 +86,25 @@ export function useAvailability({
             }),
           );
 
+        if (abortController.signal.aborted) {
+          return;
+        }
         setTimeSlots(mappedTimeSlots);
       } catch (requestError) {
-        if (
-          requestError instanceof Error &&
-          requestError.name ===
-            "AbortError"
-        ) {
+        if(
+          abortController.signal.aborted || 
+          (
+            requestError instanceof Error && requestError.name === "AbortError"
+          )
+        ){
           return;
         }
 
         setError(
-          requestError instanceof Error
-            ? requestError
-            : new Error(
-                "An unknown availability error occurred.",
-              ),
-        );
+          requestError instanceof Error ? requestError : new Error(
+            "An unknown availability error occurred."
+          ),
+        )
       } finally {
         if (
           !abortController.signal.aborted
@@ -112,12 +114,15 @@ export function useAvailability({
       }
     }
 
-    void loadAvailability();
+    const timeoutId = setTimeout(() => {
+      void loadAvailability();
+    }, 150);
 
     return () => {
+      clearTimeout(timeoutId);
       abortController.abort();
     };
-  }, [serviceId, date]);
+ }, [serviceId, date]);
 
   return {
     timeSlots,
