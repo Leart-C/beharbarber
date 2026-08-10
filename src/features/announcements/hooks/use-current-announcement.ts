@@ -1,47 +1,62 @@
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
+import { useFocusEffect } from "expo-router";
 
 import { getCurrentAnnouncement } from "../api/get-current-announcement";
 import type { CurrentAnnouncement } from "../types/announcement-response";
 
-export function useCurrentAnnouncement(){
-    const [announcement,setAnnouncement] = useState<CurrentAnnouncement | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<Error | null>(null);
+export function useCurrentAnnouncement() {
+  const [announcement, setAnnouncement] =
+    useState<CurrentAnnouncement | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
-    useEffect(()=>{
-        const abortController = new AbortController();
+  useFocusEffect(
+    useCallback(() => {
+      const abortController = new AbortController();
 
-        async function loadAnnouncement(){
-            try {
-                setIsLoading(true);
-                setError(null);
+      getCurrentAnnouncement({
+        signal: abortController.signal,
+      })
+        .then((response) => {
+          if (abortController.signal.aborted) {
+            return;
+          }
 
-                const response = await getCurrentAnnouncement({signal: abortController.signal});
+          setAnnouncement(response.announcement);
+          setError(null);
+        })
+        .catch((requestError: unknown) => {
+          if (
+            abortController.signal.aborted ||
+            (requestError instanceof Error &&
+              requestError.name === "AbortError")
+          ) {
+            return;
+          }
 
-                if(!abortController.signal.aborted){
-                    setAnnouncement(response.announcement);
-                }
-            } catch (requestError) {
-                if(
-                    abortController.signal.aborted || (requestError instanceof Error && requestError.name === "AbortError")
-                ){
-                return;
-                }
+          setError(
+            requestError instanceof Error
+              ? requestError
+              : new Error(
+                  "An unknown announcement error occurred.",
+                ),
+          );
+        })
+        .finally(() => {
+          if (!abortController.signal.aborted) {
+            setIsLoading(false);
+          }
+        });
 
-                setError(
-                    requestError instanceof Error ? requestError : new Error("An unknown announcement error occurred")
-                );
-            } finally{
-                if(!abortController.signal.aborted){
-                    setIsLoading(false);
-                }
-            }
-        }
+      return () => {
+        abortController.abort();
+      };
+    }, []),
+  );
 
-        void loadAnnouncement();
-
-        return ()=> abortController.abort();
-    }, []);
-
-    return {announcement, isLoading, error};
+  return {
+    announcement,
+    isLoading,
+    error,
+  };
 }
