@@ -1,4 +1,4 @@
-import { serviceCategoriesMetadata as categoryMetadata, serviceCategoriesMetadata } from "../data/service-category-metadata.ts";
+import { serviceCategoriesMetadata } from "../data/service-category-metadata";
 import type { BarberService } from "../types/service";
 import type { ServiceCategory } from "../types/service-category";
 import type { ServicesResponse } from "../types/services-response";
