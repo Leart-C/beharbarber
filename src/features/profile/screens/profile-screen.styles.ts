@@ -32,68 +32,47 @@ export const styles = StyleSheet.create({
     lineHeight: 21,
   },
 
-  stateCard: {
-    minHeight: 140,
+  sections: {
     marginTop: spacing.xl,
-    padding: spacing.lg,
+    gap: spacing.xl,
+  },
 
-    alignItems: "center",
-    justifyContent: "center",
+  sectionTitle: {
+    marginBottom: spacing.sm,
+
+    color: "rgba(255, 255, 255, 0.5)",
+    fontFamily: fontFamily.bold,
+    fontSize: 12,
+    lineHeight: 17,
+    letterSpacing: 0.9,
+    textTransform: "uppercase",
+  },
+
+  menuCard: {
+    overflow: "hidden",
 
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.12)",
-    borderRadius: 26,
+    borderRadius: radius.lg,
     backgroundColor: "rgba(255, 255, 255, 0.08)",
   },
 
-  stateText: {
-    marginTop: spacing.md,
-
-    color: "rgba(255, 255, 255, 0.58)",
-    fontFamily: fontFamily.medium,
-    fontSize: 14,
-    lineHeight: 20,
-    textAlign: "center",
-  },
-
-  errorTitle: {
-    color: brandColors.white,
-    fontFamily: fontFamily.semiBold,
-    fontSize: 15,
-    lineHeight: 21,
-    textAlign: "center",
-  },
-
-  retryButton: {
-    minHeight: 44,
-    marginTop: spacing.lg,
-    paddingHorizontal: spacing.xl,
-
-    alignItems: "center",
-    justifyContent: "center",
-
-    borderRadius: radius.pill,
-    backgroundColor: brandColors.blue,
-  },
-
-  retryButtonText: {
-    color: brandColors.white,
-    fontFamily: fontFamily.semiBold,
-    fontSize: 14,
-    lineHeight: 20,
+  signOutPressable: {
+    width: "100%",
   },
 
   signOutButton: {
-    minHeight: 54,
+    width: "100%",
+    minHeight: 56,
     paddingHorizontal: spacing.xl,
 
     alignItems: "center",
     justifyContent: "center",
 
     borderWidth: 1,
-    borderColor: "rgba(239, 98, 104, 0.34)",
+    borderColor: "rgba(239, 98, 104, 0.42)",
     borderRadius: radius.lg,
-    backgroundColor: "rgba(239, 98, 104, 0.12)",
+    backgroundColor: "rgba(239, 98, 104, 0.18)",
   },
 
   signOutButtonText: {
@@ -106,9 +85,5 @@ export const styles = StyleSheet.create({
   buttonPressed: {
     opacity: 0.72,
     transform: [{ scale: 0.985 }],
-  },
-  signOutPressable: {
-    width: "100%",
-    marginTop: spacing.xl,
   },
 });

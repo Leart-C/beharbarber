@@ -21,10 +21,8 @@ import { ServiceList } from "@/features/services/components/service-list";
 import { useServices } from "@/features/services/hooks/use-services";
 import type { ServiceCategoryId } from "@/features/services/types/service-category";
 import { useScrollToSection } from "@/hooks/use-scroll-to-section";
-
 import { BarberAlert } from "../components/barber-alert";
 import { HomeHeader } from "../components/home-header";
-import { LanguageToggle } from "@/features/localization/components/language-toggle";
 import { styles } from "./home-screen.styles";
 
 export function HomeScreen() {
@@ -35,7 +33,7 @@ export function HomeScreen() {
 
   const nextAppointment = useNextAppointment();
   const { announcement } = useCurrentAnnouncement();
-  const { language, serviceName, setLanguage, t } = useTranslation();
+  const { language, serviceName, t } = useTranslation();
 
   const {
     categories,
@@ -126,14 +124,7 @@ export function HomeScreen() {
         showsVerticalScrollIndicator={false}
         contentInsetAdjustmentBehavior="never"
       >
-        <HomeHeader
-          rightAccessory={
-            <LanguageToggle
-              value={language}
-              onChange={setLanguage}
-            />
-          }
-        />
+        <HomeHeader/>
 
         <View style={styles.content}>
           {shouldShowAnnouncement &&

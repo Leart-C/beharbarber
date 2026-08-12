@@ -1,6 +1,6 @@
-import { useClerk } from "@clerk/expo";
+import { useClerk, useUser } from "@clerk/expo";
+import { router } from "expo-router";
 import {
-  ActivityIndicator,
   Pressable,
   ScrollView,
   Text,
@@ -8,23 +8,38 @@ import {
 } from "react-native";
 
 import { SafeAreaScreen } from "@/components/layout/safe-area-screen";
-import { useBusinessSettings } from "@/features/business/hooks/use-business-settings";
 import { useTranslation } from "@/features/localization/hooks/use-translation";
-import { brandColors } from "@/theme/colors";
 
-import { BusinessContactCard } from "@/features/business/components/business-contact-card";
+import { ProfileAccountCard } from "../components/profile-account-card";
+import { ProfileMenuRow } from "../components/profile-menu-row";
+import { ProfileSettingsCard } from "../components/profile-settings-card";
 import { styles } from "./profile-screen.styles";
 
 export function ProfileScreen() {
   const { signOut } = useClerk();
+  const { user, isLoaded } = useUser();
   const { t } = useTranslation();
 
-  const {
-    businessSettings,
-    isLoading,
-    error,
-    refreshBusinessSettings,
-  } = useBusinessSettings();
+  if (!isLoaded || !user) {
+    return null;
+  }
+
+  const customerName =
+    user.fullName ??
+    user.firstName ??
+    t("profile.customer");
+
+  const customerEmail =
+    user.primaryEmailAddress?.emailAddress ??
+    t("profile.emailUnavailable");
+
+  function openShop() {
+    router.push("/shop");
+  }
+
+  function handleSignOut() {
+    void signOut();
+  }
 
   return (
     <SafeAreaScreen edges={["top", "left", "right"]}>
@@ -42,71 +57,58 @@ export function ProfileScreen() {
           </Text>
         </View>
 
-        {isLoading && !businessSettings ? (
-          <View style={styles.stateCard}>
-            <ActivityIndicator
-              color={brandColors.blue}
-              size="small"
-            />
-
-            <Text style={styles.stateText}>
-              {t("profile.businessLoading")}
-            </Text>
-          </View>
-        ) : null}
-
-        {!isLoading && error && !businessSettings ? (
-          <View style={styles.stateCard}>
-            <Text style={styles.errorTitle}>
-              {t("profile.businessLoadError")}
-            </Text>
-
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t("profile.retry")}
-              onPress={refreshBusinessSettings}
-            >
-              {({ pressed }) => (
-                <View
-                  style={[
-                    styles.retryButton,
-                    pressed && styles.buttonPressed,
-                  ]}
-                >
-                  <Text style={styles.retryButtonText}>
-                    {t("profile.retry")}
-                  </Text>
-                </View>
-              )}
-            </Pressable>
-          </View>
-        ) : null}
-
-        {businessSettings ? (
-          <BusinessContactCard
-            businessSettings={businessSettings}
+        <View style={styles.sections}>
+          <ProfileAccountCard
+            name={customerName}
+            email={customerEmail}
+            imageUrl={user.imageUrl}
           />
-        ) : null}
 
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t("profile.signOut")}
-          onPress={() => void signOut()}
-          style={styles.signOutPressable}
-        >
-          {({ pressed }) => (
-            <View
-              style={[
-                styles.signOutButton,
-                pressed && styles.buttonPressed,
-              ]}
-            >
-              <Text style={styles.signOutButtonText}>
-                {t("profile.signOut")}
-              </Text>
+          <ProfileSettingsCard />
+
+          <View>
+            <Text style={styles.sectionTitle}>
+              {t("profile.information")}
+            </Text>
+
+            <View style={styles.menuCard}>
+              <ProfileMenuRow
+                icon={{
+                  ios: "storefront",
+                  android: "storefront",
+                  web: "storefront",
+                }}
+                label={t("profile.aboutShop")}
+                value={t("profile.aboutShopDescription")}
+                accessibilityLabel={t(
+                  "profile.openAboutShop",
+                )}
+                showChevron
+                onPress={openShop}
+              />
             </View>
-          )}
-        </Pressable>
+          </View>
+
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t("profile.signOut")}
+            onPress={handleSignOut}
+            style={styles.signOutPressable}
+          >
+            {({ pressed }) => (
+              <View
+                style={[
+                  styles.signOutButton,
+                  pressed && styles.buttonPressed,
+                ]}
+              >
+                <Text style={styles.signOutButtonText}>
+                  {t("profile.signOut")}
+                </Text>
+              </View>
+            )}
+          </Pressable>
+        </View>
       </ScrollView>
     </SafeAreaScreen>
   );
