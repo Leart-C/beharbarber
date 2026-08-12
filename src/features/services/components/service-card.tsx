@@ -1,16 +1,18 @@
 import { Pressable, Text, View } from "react-native";
 import { useTranslation } from "@/features/localization/hooks/use-translation";
-
+import { brandColors } from "@/theme/colors";
+import type { ServiceCategoryIconName } from "../types/service-category";
+import { ServiceCategoryIcon } from "./service-category-icon";
 import type { BarberService } from "../types/service";
 import { styles } from "./service-card.styles";
 
 type ServiceCardProps = {
   service: BarberService;
-  symbol: string;
+  iconName: ServiceCategoryIconName;
   onAdd: (service: BarberService) => void;
 };
 
-export function ServiceCard({service,symbol,onAdd}:ServiceCardProps){
+export function ServiceCard({service,iconName,onAdd}:ServiceCardProps){
     const { serviceName, t } = useTranslation();
     const localizedName = serviceName(service.name);
     return (
@@ -28,7 +30,11 @@ export function ServiceCard({service,symbol,onAdd}:ServiceCardProps){
                 ]}
             >
                 <View style={styles.iconContainer}>
-                <Text style={styles.icon}>{symbol}</Text>
+                <ServiceCategoryIcon
+                    name={iconName}
+                    size={27}
+                    color={brandColors.blue}
+                />
                 </View>
 
                 <View style={styles.information}>

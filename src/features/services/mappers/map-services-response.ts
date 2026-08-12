@@ -17,7 +17,7 @@ export function mapServicesResponse(
     return {
       id: category.slug,
       label: category.name,
-      symbol: metadata?.symbol ?? "•",
+      iconName: metadata?.iconName ?? "scissors",
     };
   });
 

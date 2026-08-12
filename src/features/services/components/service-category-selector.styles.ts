@@ -45,12 +45,6 @@ export const styles = StyleSheet.create({
     transform: [{ scale: 0.97 }],
   },
 
-  symbol: {
-    color: "rgba(255, 255, 255, 0.72)",
-    fontSize: 28,
-    lineHeight: 32,
-  },
-
   label: {
     color: "rgba(255, 255, 255, 0.72)",
     fontFamily: fontFamily.semiBold,

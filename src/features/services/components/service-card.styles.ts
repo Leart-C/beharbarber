@@ -25,14 +25,8 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
 
-    borderRadius: 18,
+    borderRadius: 18, 
     backgroundColor: "rgba(78, 132, 229, 0.18)",
-  },
-
-  icon: {
-    color: brandColors.blue,
-    fontSize: 25,
-    lineHeight: 30,
   },
 
   information: {

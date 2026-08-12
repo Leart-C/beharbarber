@@ -1,19 +1,19 @@
-import type { ServiceCategory } from "../types/service-category.js";
+import type { ServiceCategory } from "../types/service-category";
 
 export const serviceCategoriesMetadata: ServiceCategory[] = [
   {
     id: "haircut",
     label: "Qethje",
-    symbol: "✂",
+    iconName: "scissors",
   },
   {
     id: "shave",
     label: "Rroje",
-    symbol: "⌁",
+    iconName: "razor",
   },
   {
     id: "styling",
     label: "Stilim",
-    symbol: "▥",
+    iconName: "hair-dryer",
   },
 ];

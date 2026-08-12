@@ -2,22 +2,28 @@ import { Pressable, Text, View } from "react-native";
 
 import type { BarberService } from "@/features/services/types/service";
 import { useTranslation } from "@/features/localization/hooks/use-translation";
-
+import { brandColors } from "@/theme/colors";
+import { ServiceCategoryIcon } from "@/features/services/components/service-category-icon";
+import type { ServiceCategoryIconName } from "@/features/services/types/service-category";
 import { styles } from "./selected-service-card.styles";
 
 type SelectedServiceCardProps = {
-    service: BarberService;
-    symbol: string;
-    onChange: ()=> void;
-}
+  service: BarberService;
+  iconName: ServiceCategoryIconName;
+  onChange: () => void;
+};
 
-export function SelectedServiceCard({service,symbol,onChange}: SelectedServiceCardProps){
+export function SelectedServiceCard({service,iconName,onChange}: SelectedServiceCardProps){
     const { serviceName, t } = useTranslation();
     return(
         <View style={styles.container}>
             <View style={styles.topRow}>
                 <View style={styles.iconContainer}>
-                    <Text style={styles.icon}>{symbol}</Text>
+                <ServiceCategoryIcon
+                    name={iconName}
+                    size={30}
+                    color={brandColors.blue}
+                />
                 </View>
 
                 <View style={styles.information}>

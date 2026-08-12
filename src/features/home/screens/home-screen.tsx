@@ -187,8 +187,8 @@ export function HomeScreen() {
                       ? t(`serviceCategories.${selectedCategory.id}`)
                       : t("home.services")
                   }
-                  symbol={
-                    selectedCategory?.symbol ?? ""
+                  iconName={
+                    selectedCategory?.iconName ?? "scissors"
                   }
                   services={filteredServices}
                   onAddService={(service) => {

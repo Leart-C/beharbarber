@@ -246,7 +246,7 @@ export function BookingScreen({ serviceId }: BookingScreenProps) {
         <View style={styles.selectedService}>
           <SelectedServiceCard
             service={service}
-            symbol={category?.symbol ?? ""}
+            iconName={category?.iconName ?? "scissors"}
             onChange={() => router.back()}
           />
         </View>
