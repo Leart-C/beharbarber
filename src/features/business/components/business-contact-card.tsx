@@ -1,8 +1,8 @@
 import { Alert, Text, View } from "react-native";
 import * as Linking from "expo-linking";
 
-import { useTranslation } from "@/features/localization/hooks/use-translation";
 import type { BusinessSettings } from "@/features/business/types/business-settings";
+import { useTranslation } from "@/features/localization/hooks/use-translation";
 
 import { BusinessContactRow } from "./business-contact-row";
 import { styles } from "./business-contact-card.styles";
@@ -59,15 +59,15 @@ export function BusinessContactCard({
   function openUrl(url: string) {
     void Linking.openURL(url).catch(() => {
       Alert.alert(
-        t("profile.linkErrorTitle"),
-        t("profile.linkErrorMessage"),
+        t("business.linkErrorTitle"),
+        t("business.linkErrorMessage"),
       );
     });
   }
 
-const phone = businessSettings.phone;
-const contactEmail = businessSettings.contactEmail;
-const instagramUrl = businessSettings.instagramUrl;
+  const phone = businessSettings.phone;
+  const contactEmail = businessSettings.contactEmail;
+  const instagramUrl = businessSettings.instagramUrl;
 
   return (
     <View style={styles.container}>
@@ -86,7 +86,7 @@ const instagramUrl = businessSettings.instagramUrl;
           </Text>
 
           <Text numberOfLines={1} style={styles.barberName}>
-            {t("profile.barber", {
+            {t("business.barber", {
               name: businessSettings.publicBarberName,
             })}
           </Text>
@@ -96,7 +96,7 @@ const instagramUrl = businessSettings.instagramUrl;
       <View style={styles.divider} />
 
       <Text style={styles.sectionTitle}>
-        {t("profile.businessContact")}
+        {t("business.businessContact")}
       </Text>
 
       {hasContactInformation ? (
@@ -108,18 +108,18 @@ const instagramUrl = businessSettings.instagramUrl;
                 android: "location_on",
                 web: "location_on",
               }}
-              label={t("profile.address")}
+              label={t("business.address")}
               value={
                 businessSettings.address ??
-                t("profile.openLocation")
+                t("business.openLocation")
               }
               accessibilityLabel={t(
-                "profile.openContact",
+                "business.openContact",
                 {
-                  label: t("profile.address"),
+                  label: t("business.address"),
                   value:
                     businessSettings.address ??
-                    t("profile.openLocation"),
+                    t("business.openLocation"),
                 },
               )}
               onPress={() => openUrl(locationUrl)}
@@ -128,58 +128,58 @@ const instagramUrl = businessSettings.instagramUrl;
 
           {phone ? (
             <BusinessContactRow
-                icon={{
+              icon={{
                 ios: "phone.fill",
                 android: "call",
                 web: "call",
-                }}
-                label={t("profile.phone")}
-                value={phone}
-                accessibilityLabel={t("profile.openContact", {
-                label: t("profile.phone"),
+              }}
+              label={t("business.phone")}
+              value={phone}
+              accessibilityLabel={t("business.openContact", {
+                label: t("business.phone"),
                 value: phone,
-                })}
-                onPress={() => openUrl(createPhoneUrl(phone))}
+              })}
+              onPress={() => openUrl(createPhoneUrl(phone))}
             />
-            ) : null}
+          ) : null}
 
           {contactEmail ? (
             <BusinessContactRow
-                icon={{
+              icon={{
                 ios: "envelope.fill",
                 android: "mail",
                 web: "mail",
-                }}
-                label={t("profile.email")}
-                value={contactEmail}
-                accessibilityLabel={t("profile.openContact", {
-                label: t("profile.email"),
+              }}
+              label={t("business.email")}
+              value={contactEmail}
+              accessibilityLabel={t("business.openContact", {
+                label: t("business.email"),
                 value: contactEmail,
-                })}
-                onPress={() => openUrl(`mailto:${contactEmail}`)}
+              })}
+              onPress={() => openUrl(`mailto:${contactEmail}`)}
             />
-            ) : null}
+          ) : null}
 
           {instagramUrl ? (
             <BusinessContactRow
-                icon={{
+              icon={{
                 ios: "camera.fill",
                 android: "photo_camera",
                 web: "photo_camera",
-                }}
-                label={t("profile.instagram")}
-                value={getInstagramDisplayValue(instagramUrl)}
-                accessibilityLabel={t("profile.openContact", {
-                label: t("profile.instagram"),
+              }}
+              label={t("business.instagram")}
+              value={getInstagramDisplayValue(instagramUrl)}
+              accessibilityLabel={t("business.openContact", {
+                label: t("business.instagram"),
                 value: getInstagramDisplayValue(instagramUrl),
-                })}
-                onPress={() => openUrl(instagramUrl)}
+              })}
+              onPress={() => openUrl(instagramUrl)}
             />
-            ) : null}
+          ) : null}
         </View>
       ) : (
         <Text style={styles.emptyText}>
-          {t("profile.noContactInformation")}
+          {t("business.noContactInformation")}
         </Text>
       )}
     </View>

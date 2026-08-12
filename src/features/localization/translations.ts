@@ -29,6 +29,27 @@ export const translations = {
       businessLoadError: "Informacionet e biznesit nuk mund të ngarkohen.",
       retry: "Provo përsëri",
     },
+    business: {
+      title: "Rreth lokalit",
+      description: "Kontakto ose gjej Behar Barber.",
+      businessContact: "Kontakti i biznesit",
+      barber: "Berberi: {name}",
+      address: "Adresa",
+      phone: "Telefoni",
+      email: "Emaili",
+      instagram: "Instagram",
+      openLocation: "Hap lokacionin",
+      openContact: "Hap {label}: {value}",
+      noContactInformation:
+        "Informacionet e kontaktit nuk janë caktuar ende.",
+      loading: "Duke ngarkuar informacionet e biznesit...",
+      loadError:
+        "Informacionet e biznesit nuk mund të ngarkohen.",
+      retry: "Provo përsëri",
+      linkErrorTitle: "Lidhja nuk u hap",
+      linkErrorMessage:
+        "Nuk mundëm ta hapnim këtë lidhje. Provo përsëri.",
+    },
     feedback: { seeYouSoon: "Shihemi së shpejti!" },
   },
   en: {
@@ -58,7 +79,26 @@ export const translations = {
       businessLoading: "Loading business information...",
       businessLoadError: "Business information could not be loaded.",
       retry: "Try again",
-      
+    },
+    business: {
+      title: "About the shop",
+      description: "Contact or find Behar Barber.",
+      businessContact: "Business contact",
+      barber: "Barber: {name}",
+      address: "Address",
+      phone: "Phone",
+      email: "Email",
+      instagram: "Instagram",
+      openLocation: "Open location",
+      openContact: "Open {label}: {value}",
+      noContactInformation:
+        "Contact information has not been configured yet.",
+      loading: "Loading business information...",
+      loadError: "Business information could not be loaded.",
+      retry: "Try again",
+      linkErrorTitle: "Link could not be opened",
+      linkErrorMessage:
+        "We could not open this link. Please try again.",
     },
     
     feedback: { seeYouSoon: "See you soon!" },
