@@ -11,7 +11,7 @@ import { SafeAreaScreen } from "@/components/layout/safe-area-screen";
 import { useTranslation } from "@/features/localization/hooks/use-translation";
 
 import { ProfileAccountCard } from "../components/profile-account-card";
-import { ProfileMenuRow } from "../components/profile-menu-row";
+import { ProfileInformationCard } from "../components/profile-information-card";
 import { ProfileSettingsCard } from "../components/profile-settings-card";
 import { styles } from "./profile-screen.styles";
 
@@ -35,6 +35,14 @@ export function ProfileScreen() {
 
   function openShop() {
     router.push("/shop");
+  }
+
+  function openPrivacy() {
+    router.push("/privacy");
+  }
+
+  function openTerms() {
+    router.push("/terms");
   }
 
   function handleSignOut() {
@@ -66,28 +74,11 @@ export function ProfileScreen() {
 
           <ProfileSettingsCard />
 
-          <View>
-            <Text style={styles.sectionTitle}>
-              {t("profile.information")}
-            </Text>
-
-            <View style={styles.menuCard}>
-              <ProfileMenuRow
-                icon={{
-                  ios: "storefront",
-                  android: "storefront",
-                  web: "storefront",
-                }}
-                label={t("profile.aboutShop")}
-                value={t("profile.aboutShopDescription")}
-                accessibilityLabel={t(
-                  "profile.openAboutShop",
-                )}
-                showChevron
-                onPress={openShop}
-              />
-            </View>
-          </View>
+          <ProfileInformationCard
+            onOpenShop={openShop}
+            onOpenPrivacy={openPrivacy}
+            onOpenTerms={openTerms}
+          />
 
           <Pressable
             accessibilityRole="button"
