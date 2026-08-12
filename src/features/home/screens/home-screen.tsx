@@ -24,7 +24,7 @@ import { useScrollToSection } from "@/hooks/use-scroll-to-section";
 
 import { BarberAlert } from "../components/barber-alert";
 import { HomeHeader } from "../components/home-header";
-import { LanguageToggle } from "../components/language-toggle";
+import { LanguageToggle } from "@/features/localization/components/language-toggle";
 import { styles } from "./home-screen.styles";
 
 export function HomeScreen() {

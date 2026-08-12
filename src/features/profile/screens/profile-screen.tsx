@@ -1,35 +1,113 @@
 import { useClerk } from "@clerk/expo";
-import { Pressable, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 
 import { SafeAreaScreen } from "@/components/layout/safe-area-screen";
+import { useBusinessSettings } from "@/features/business/hooks/use-business-settings";
 import { useTranslation } from "@/features/localization/hooks/use-translation";
+import { brandColors } from "@/theme/colors";
+
+import { BusinessContactCard } from "../components/business-contact-card";
+import { styles } from "./profile-screen.styles";
 
 export function ProfileScreen() {
   const { signOut } = useClerk();
   const { t } = useTranslation();
 
+  const {
+    businessSettings,
+    isLoading,
+    error,
+    refreshBusinessSettings,
+  } = useBusinessSettings();
+
   return (
     <SafeAreaScreen edges={["top", "left", "right"]}>
-      <View className="flex-1 px-6 pt-6">
-        <Text className="font-inter-extrabold text-3xl text-foreground">
-          {t("profile.title")}
-        </Text>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.content}
+      >
+        <View>
+          <Text style={styles.title}>
+            {t("profile.title")}
+          </Text>
 
-        <Text className="mt-2 font-inter-medium text-base text-foreground-secondary">
-          {t("profile.description")}
-        </Text>
+          <Text style={styles.description}>
+            {t("profile.description")}
+          </Text>
+        </View>
+
+        {isLoading && !businessSettings ? (
+          <View style={styles.stateCard}>
+            <ActivityIndicator
+              color={brandColors.blue}
+              size="small"
+            />
+
+            <Text style={styles.stateText}>
+              {t("profile.businessLoading")}
+            </Text>
+          </View>
+        ) : null}
+
+        {!isLoading && error && !businessSettings ? (
+          <View style={styles.stateCard}>
+            <Text style={styles.errorTitle}>
+              {t("profile.businessLoadError")}
+            </Text>
+
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t("profile.retry")}
+              onPress={refreshBusinessSettings}
+            >
+              {({ pressed }) => (
+                <View
+                  style={[
+                    styles.retryButton,
+                    pressed && styles.buttonPressed,
+                  ]}
+                >
+                  <Text style={styles.retryButtonText}>
+                    {t("profile.retry")}
+                  </Text>
+                </View>
+              )}
+            </Pressable>
+          </View>
+        ) : null}
+
+        {businessSettings ? (
+          <BusinessContactCard
+            businessSettings={businessSettings}
+          />
+        ) : null}
 
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t("profile.signOut")}
-          onPress={() => signOut()}
-          className="mt-8 min-h-14 items-center justify-center rounded-2xl bg-danger px-6 active:opacity-80"
+          onPress={() => void signOut()}
+          style={styles.signOutPressable}
         >
-          <Text className="font-inter-bold text-base text-white">
-            {t("profile.signOut")}
-          </Text>
+          {({ pressed }) => (
+            <View
+              style={[
+                styles.signOutButton,
+                pressed && styles.buttonPressed,
+              ]}
+            >
+              <Text style={styles.signOutButtonText}>
+                {t("profile.signOut")}
+              </Text>
+            </View>
+          )}
         </Pressable>
-      </View>
+      </ScrollView>
     </SafeAreaScreen>
   );
 }
