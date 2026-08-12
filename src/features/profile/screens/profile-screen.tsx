@@ -12,7 +12,7 @@ import { useBusinessSettings } from "@/features/business/hooks/use-business-sett
 import { useTranslation } from "@/features/localization/hooks/use-translation";
 import { brandColors } from "@/theme/colors";
 
-import { BusinessContactCard } from "../components/business-contact-card";
+import { BusinessContactCard } from "@/features/business/components/business-contact-card";
 import { styles } from "./profile-screen.styles";
 
 export function ProfileScreen() {
