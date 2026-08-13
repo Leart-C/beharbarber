@@ -2,13 +2,15 @@ import {
   useEffect,
   useState,
 } from "react";
-
+import type { AuthenticatedRequest } from "@/hooks/use-authenticated-api";
 import { getAvailability } from "../api/get-availability";
 import type { BookingTimeSlot } from "../types/booking-time-slot";
 
 type UseAvailabilityOptions = {
   serviceId: string;
   date: string;
+  appointmentId?: string;
+  authenticatedRequest: AuthenticatedRequest;
 };
 
 function formatTimeLabel(
@@ -28,6 +30,8 @@ function formatTimeLabel(
 export function useAvailability({
   serviceId,
   date,
+  appointmentId,
+  authenticatedRequest,
 }: UseAvailabilityOptions) {
   const [
     timeSlots,
@@ -68,8 +72,9 @@ export function useAvailability({
           await getAvailability({
             serviceId,
             date,
-            signal:
-              abortController.signal,
+            appointmentId,
+            signal: abortController.signal,
+            authenticatedRequest,
           });
 
         const mappedTimeSlots =
@@ -122,7 +127,7 @@ export function useAvailability({
       clearTimeout(timeoutId);
       abortController.abort();
     };
- }, [serviceId, date]);
+ }, [serviceId, date, appointmentId, authenticatedRequest]);
 
   return {
     timeSlots,

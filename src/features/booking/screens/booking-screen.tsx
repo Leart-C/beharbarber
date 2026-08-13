@@ -8,7 +8,7 @@ import {
   Text,
   View,
 } from "react-native";
-
+import { rescheduleAppointment } from "@/features/appointments/api/reschedule-appointment";
 import { SuccessConfirmation } from "@/components/feedback/success-confirmation";
 import { SafeAreaScreen } from "@/components/layout/safe-area-screen";
 import { createAppointment } from "@/features/appointments/api/create-appointment";
@@ -28,13 +28,21 @@ import { useAvailability } from "../hooks/use-availability";
 import { createBookingDates } from "../utils/create-booking-dates";
 import { styles } from "./booking-screen.styles";
 
+type BookingMode = "create" | "reschedule";
+
 type BookingScreenProps = {
   serviceId: string;
+  appointmentId?: string;
+  mode?: BookingMode;
 };
 
-export function BookingScreen({ serviceId }: BookingScreenProps) {
+export function BookingScreen({ serviceId, appointmentId, mode = "create" }: BookingScreenProps) {
   const { language, serviceName, t } = useTranslation();
-  const { addAppointment } = useAppointments();
+  const {
+    addAppointment,
+    updateAppointment,
+    refreshAppointments,
+  } = useAppointments();
   const { authenticatedRequest } = useAuthenticatedApi();
 
   const {
@@ -43,6 +51,10 @@ export function BookingScreen({ serviceId }: BookingScreenProps) {
     isLoading: areServicesLoading,
     error: servicesError,
   } = useServices();
+
+  const isRescheduling =
+    mode === "reschedule" &&
+    Boolean(appointmentId);
 
   const {
     workingDays,
@@ -80,6 +92,10 @@ export function BookingScreen({ serviceId }: BookingScreenProps) {
   } = useAvailability({
     serviceId,
     date: selectedDateId,
+    appointmentId: isRescheduling
+      ? appointmentId
+      : undefined,
+    authenticatedRequest,
   });
 
   const service = services.find((item) => item.id === serviceId);
@@ -125,18 +141,41 @@ export function BookingScreen({ serviceId }: BookingScreenProps) {
   };
 
   const handleConfirmBooking = async () => {
-    if (
-      !service ||
-      !selectedDate ||
-      !selectedTime ||
-      isCreatingAppointment
-    ) {
-      return;
-    }
+  if (
+    !service ||
+    !selectedDate ||
+    !selectedTime ||
+    isCreatingAppointment
+  ) {
+    return;
+  }
 
-    try {
-      setIsCreatingAppointment(true);
+  try {
+    setIsCreatingAppointment(true);
 
+    if (isRescheduling && appointmentId) {
+      const response = await rescheduleAppointment({
+        authenticatedRequest,
+        appointmentId,
+        input: {
+          startsAt: selectedTime.startsAt,
+        },
+      });
+
+      const updatedAppointment = response.appointment;
+
+      updateAppointment({
+        id: updatedAppointment.id,
+        serviceId: updatedAppointment.serviceId,
+        startsAt: updatedAppointment.startsAt,
+        serviceName: updatedAppointment.serviceName,
+        durationMinutes: updatedAppointment.durationMinutes,
+        price: updatedAppointment.priceCents / 100,
+        currency: updatedAppointment.currency,
+      });
+
+      refreshAppointments();
+    } else {
       const response = await createAppointment({
         authenticatedRequest,
         input: {
@@ -149,33 +188,48 @@ export function BookingScreen({ serviceId }: BookingScreenProps) {
 
       addAppointment({
         id: createdAppointment.id,
+        serviceId: createdAppointment.serviceId,
         startsAt: createdAppointment.startsAt,
         serviceName: createdAppointment.serviceName,
         durationMinutes: createdAppointment.durationMinutes,
         price: createdAppointment.priceCents / 100,
         currency: createdAppointment.currency,
       });
-
-      setIsConfirmationVisible(true);
-    } catch (error) {
-      console.error("Appointment creation failed:", error);
-
-      if (error instanceof ApiError && error.status === 409) {
-        Alert.alert(
-          t("booking.unavailableTitle"),
-          error.message,
-        );
-        return;
-      }
-
-      Alert.alert(
-        t("booking.failedTitle"),
-        t("booking.failedMessage"),
-      );
-    } finally {
-      setIsCreatingAppointment(false);
     }
-  };
+
+    setIsConfirmationVisible(true);
+  } catch (error) {
+    console.error(
+      isRescheduling
+        ? "Appointment rescheduling failed:"
+        : "Appointment creation failed:",
+      error,
+    );
+
+    if (
+      error instanceof ApiError &&
+      error.status === 409
+    ) {
+      Alert.alert(
+        t("booking.unavailableTitle"),
+        error.message,
+      );
+
+      return;
+    }
+
+    Alert.alert(
+      isRescheduling
+        ? t("booking.rescheduleFailedTitle")
+        : t("booking.failedTitle"),
+      isRescheduling
+        ? t("booking.rescheduleFailedMessage")
+        : t("booking.failedMessage"),
+    );
+  } finally {
+    setIsCreatingAppointment(false);
+  }
+};
 
   if (areServicesLoading || isScheduleLoading) {
     return (
@@ -240,8 +294,17 @@ export function BookingScreen({ serviceId }: BookingScreenProps) {
           <Text style={styles.backLinkText}>‹ {t("common.back")}</Text>
         </Pressable>
 
-        <Text style={styles.eyebrow}>{t("booking.eyebrow")}</Text>
-        <Text style={styles.title}>{t("booking.title")}</Text>
+        <Text style={styles.eyebrow}>
+          {isRescheduling
+            ? t("booking.rescheduleEyebrow")
+            : t("booking.eyebrow")}
+        </Text>
+
+        <Text style={styles.title}>
+          {isRescheduling
+            ? t("booking.rescheduleTitle")
+            : t("booking.title")}
+        </Text>
 
         <View style={styles.selectedService}>
           <SelectedServiceCard
@@ -306,7 +369,11 @@ export function BookingScreen({ serviceId }: BookingScreenProps) {
 
       <SuccessConfirmation
         visible={isConfirmationVisible}
-        title={t("booking.confirmationTitle")}
+        title={
+          isRescheduling
+            ? t("booking.rescheduleConfirmationTitle")
+            : t("booking.confirmationTitle")
+        }
         message={
           selectedDate && selectedTime
             ? `${serviceName(service.name)} · ${selectedDate.compactWeekdayLabel}, ${selectedDate.dayLabel} ${selectedDate.monthLabel} · ${selectedTime.label}`

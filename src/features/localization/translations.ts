@@ -102,6 +102,13 @@ export const translations = {
       time: "Ora",
       total: "Totali",
       confirm: "Konfirmo rezervimin",
+      rescheduleEyebrow: "NDRYSHO TERMININ",
+      rescheduleTitle: "Zgjidh datën dhe orën e re",
+      reschedulePending: "Ruajtja e ndryshimit do të aktivizohet pasi të lidhet backend-i.",
+      rescheduleConfirmationTitle: "Termini u ndryshua!",
+      rescheduleFailedTitle: "Ndryshimi dështoi",
+      rescheduleFailedMessage:
+        "Nuk mundëm ta ndryshonim terminin. Provo përsëri.",
     },
     profile: {
       title: "Profili",
@@ -286,6 +293,13 @@ export const translations = {
       time: "Time",
       total: "Total",
       confirm: "Confirm booking",
+      rescheduleEyebrow: "RESCHEDULE APPOINTMENT",
+      rescheduleTitle: "Choose a new date and time",
+      reschedulePending: "Saving the change will be enabled after the backend is connected.",
+      rescheduleConfirmationTitle: "Appointment rescheduled!",
+      rescheduleFailedTitle: "Rescheduling failed",
+      rescheduleFailedMessage:
+        "We could not reschedule the appointment. Please try again.",
     },
     profile: {
       title: "Profile",

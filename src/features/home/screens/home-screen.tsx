@@ -79,12 +79,18 @@ export function HomeScreen() {
       service.categoryId === selectedCategoryId,
   );
 
-  const handleEditAppointment = () => {
-    Alert.alert(
-      t("home.editAppointmentTitle"),
-      t("home.editAppointmentMessage"),
-    );
-  };
+  const handleEditAppointment = (
+    appointment: Appointment,
+  ) => {
+    router.push({
+      pathname: "/booking/[serviceId]",
+      params: {
+        serviceId: appointment.serviceId,
+        appointmentId: appointment.id,
+        mode: "reschedule",
+      },
+    });
+  }
 
   const handleSelectCategory = (
     categoryId: ServiceCategoryId,
@@ -142,7 +148,7 @@ export function HomeScreen() {
           {nextAppointment ? (
             <UpcomingAppointmentCard
               appointment={nextAppointment}
-              onEdit={handleEditAppointment}
+              onEdit={()=> handleEditAppointment(nextAppointment)}
               onCancel={() =>
                 setAppointmentToCancel(
                   nextAppointment,

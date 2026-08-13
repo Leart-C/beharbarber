@@ -65,6 +65,7 @@ export function useRemoteAppointments() {
           .map(
             (appointment): Appointment => ({
               id: appointment.id,
+              serviceId:appointment.serviceId,
               startsAt: appointment.startsAt,
               serviceName: appointment.serviceName,
               durationMinutes: appointment.durationMinutes,

@@ -19,6 +19,7 @@ type AppointmentsContextValue = {
   error: Error | null;
   cancellingAppointmentId: string | null;
   addAppointment: (appointment: Appointment) => void;
+  updateAppointment: (appointment: Appointment) => void;
   removeAppointment: (appointmentId: string) => void;
   cancelAppointment: (appointmentId: string) => Promise<void>;
   refreshAppointments: () => void;
@@ -60,6 +61,19 @@ export function AppointmentsProvider({
     ]);
   }, []);
 
+  const updateAppointment = useCallback(
+    (updatedAppointment: Appointment) => {
+      setAppointments((currentAppointments) =>
+        currentAppointments.map((appointment) =>
+          appointment.id === updatedAppointment.id
+            ? updatedAppointment
+            : appointment,
+        ),
+      );
+    },
+    [],
+  );
+
   const removeAppointment = useCallback((appointmentId: string) => {
     setAppointments((currentAppointments) =>
       currentAppointments.filter(
@@ -99,6 +113,7 @@ export function AppointmentsProvider({
       error,
       cancellingAppointmentId,
       addAppointment,
+      updateAppointment,
       removeAppointment,
       cancelAppointment,
       refreshAppointments,
@@ -109,6 +124,7 @@ export function AppointmentsProvider({
       error,
       cancellingAppointmentId,
       addAppointment,
+      updateAppointment,
       removeAppointment,
       cancelAppointment,
       refreshAppointments,

@@ -1,27 +1,35 @@
-import { apiRequest } from "@/lib/api/api-client";
+import type { AuthenticatedRequest } from "@/hooks/use-authenticated-api";
 
 import type { AvailabilityResponse } from "../types/availability-response";
 
 type GetAvailabilityOptions = {
   serviceId: string;
   date: string;
+  appointmentId?: string;
   signal?: AbortSignal;
+  authenticatedRequest: AuthenticatedRequest;
 };
 
 export function getAvailability({
   serviceId,
   date,
+  appointmentId,
   signal,
+  authenticatedRequest,
 }: GetAvailabilityOptions) {
-  const query = [
-    `serviceId=${encodeURIComponent(
-      serviceId,
-    )}`,
+  const queryParts = [
+    `serviceId=${encodeURIComponent(serviceId)}`,
     `date=${encodeURIComponent(date)}`,
-  ].join("&");
+  ];
 
-  return apiRequest<AvailabilityResponse>(
-    `/api/v1/availability?${query}`,
+  if (appointmentId) {
+    queryParts.push(
+      `appointmentId=${encodeURIComponent(appointmentId)}`,
+    );
+  }
+
+  return authenticatedRequest<AvailabilityResponse>(
+    `/api/v1/availability?${queryParts.join("&")}`,
     {
       method: "GET",
       signal,
