@@ -1,8 +1,6 @@
+import { router } from "expo-router";
 import type { ComponentProps } from "react";
-import {
-  Text,
-  View,
-} from "react-native";
+import { Text, View } from "react-native";
 import { SymbolView } from "expo-symbols";
 
 import { LanguageToggle } from "@/features/localization/components/language-toggle";
@@ -12,9 +10,7 @@ import { useTranslation } from "@/features/localization/hooks/use-translation";
 import { ProfileMenuRow } from "./profile-menu-row";
 import { styles } from "./profile-settings-card.styles";
 
-const languageIcon: ComponentProps<
-  typeof SymbolView
->["name"] = {
+const languageIcon: ComponentProps<typeof SymbolView>["name"] = {
   ios: "globe",
   android: "language",
   web: "language",
@@ -26,19 +22,20 @@ export function ProfileSettingsCard() {
 
   return (
     <View>
-      <Text style={styles.sectionTitle}>
-        {t("profile.preferences")}
-      </Text>
+      <Text style={styles.sectionTitle}>{t("profile.preferences")}</Text>
 
       <View style={styles.container}>
+        <ProfileMenuRow
+          icon={{ ios: "bell", android: "notifications", web: "notifications" }}
+          label={language === "sq" ? "Njoftimet" : "Notifications"}
+          showChevron
+          onPress={() => router.push("/notifications")}
+        />
         <ProfileMenuRow
           icon={languageIcon}
           label={t("profile.language")}
           trailingContent={
-            <LanguageToggle
-              value={language}
-              onChange={setLanguage}
-            />
+            <LanguageToggle value={language} onChange={setLanguage} />
           }
         />
       </View>

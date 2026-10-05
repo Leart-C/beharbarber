@@ -4,11 +4,10 @@ import type { PropsWithChildren } from "react";
 import { AppointmentsProvider } from "@/features/appointments/context/appointments-context";
 import { LanguageProvider } from "@/features/localization/context/language-context";
 
+import { NotificationsProvider } from "@/features/notifications/context/notifications-context";
 import { env } from "@/config/env";
 
-export function AppProvider({
-  children,
-}: PropsWithChildren) {
+export function AppProvider({ children }: PropsWithChildren) {
   return (
     <ClerkProvider
       publishableKey={env.clerkPublishableKey}
@@ -16,7 +15,7 @@ export function AppProvider({
     >
       <LanguageProvider>
         <AppointmentsProvider>
-          {children}
+          <NotificationsProvider>{children}</NotificationsProvider>
         </AppointmentsProvider>
       </LanguageProvider>
     </ClerkProvider>
