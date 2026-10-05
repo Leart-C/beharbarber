@@ -1,137 +1,96 @@
-import {
-  useEffect,
-  useState,
-} from "react";
+import { useCallback, useEffect, useState } from "react";
+import { SHOP_TIME_ZONE } from "@/config/shop";
 import type { AuthenticatedRequest } from "@/hooks/use-authenticated-api";
 import { getAvailability } from "../api/get-availability";
 import type { BookingTimeSlot } from "../types/booking-time-slot";
 
-type UseAvailabilityOptions = {
+type Options = {
   serviceId: string;
   date: string;
   appointmentId?: string;
   authenticatedRequest: AuthenticatedRequest;
 };
-
-function formatTimeLabel(
-  startsAt: string,
-): string {
-  return new Intl.DateTimeFormat(
-    "sq-AL",
-    {
-      timeZone: "Europe/Belgrade",
-      hour: "2-digit",
-      minute: "2-digit",
-      hourCycle: "h23",
-    },
-  ).format(new Date(startsAt));
-}
+type Result = {
+  key: string;
+  request: AuthenticatedRequest;
+  timeSlots: BookingTimeSlot[];
+  error: Error | null;
+};
+const timeFormatter = new Intl.DateTimeFormat("sq-AL", {
+  timeZone: SHOP_TIME_ZONE,
+  hour: "2-digit",
+  minute: "2-digit",
+  hourCycle: "h23",
+});
 
 export function useAvailability({
   serviceId,
   date,
   appointmentId,
   authenticatedRequest,
-}: UseAvailabilityOptions) {
-  const [
-    timeSlots,
-    setTimeSlots,
-  ] = useState<BookingTimeSlot[]>([]);
-
-  const [
-    isLoading,
-    setIsLoading,
-  ] = useState(true);
-
-  const [
-    error,
-    setError,
-  ] = useState<Error | null>(null);
+}: Options) {
+  const [result, setResult] = useState<Result | null>(null);
+  const [revision, setRevision] = useState(0);
+  const refreshAvailability = useCallback(
+    () => setRevision((value) => value + 1),
+    [],
+  );
+  const key = JSON.stringify([serviceId, date, appointmentId, revision]);
+  const enabled = Boolean(serviceId && date);
 
   useEffect(() => {
-    const abortController =
-      new AbortController();
-
-    if (!serviceId || !date) {
-      setTimeSlots([]);
-      setIsLoading(false);
-      setError(null);
-
-      return () => {
-        abortController.abort();
-      };
-    }
-
-    setIsLoading(true);
-    setError(null);
-    setTimeSlots([]);
-
-    async function loadAvailability() {
+    if (!enabled) return;
+    const controller = new AbortController();
+    async function load() {
       try {
-        const response =
-          await getAvailability({
-            serviceId,
-            date,
-            appointmentId,
-            signal: abortController.signal,
-            authenticatedRequest,
-          });
-
-        const mappedTimeSlots =
-          response.timeSlots.map(
-            (timeSlot) => ({
-              id: timeSlot.startsAt,
-              startsAt:
-                timeSlot.startsAt,
-              label: formatTimeLabel(
-                timeSlot.startsAt,
-              ),
-              isAvailable:
-                timeSlot.available,
-            }),
-          );
-
-        if (abortController.signal.aborted) {
-          return;
-        }
-        setTimeSlots(mappedTimeSlots);
-      } catch (requestError) {
-        if(
-          abortController.signal.aborted || 
-          (
-            requestError instanceof Error && requestError.name === "AbortError"
-          )
-        ){
-          return;
-        }
-
-        setError(
-          requestError instanceof Error ? requestError : new Error(
-            "An unknown availability error occurred."
-          ),
-        )
-      } finally {
-        if (
-          !abortController.signal.aborted
-        ) {
-          setIsLoading(false);
-        }
+        const response = await getAvailability({
+          serviceId,
+          date,
+          appointmentId,
+          authenticatedRequest,
+          signal: controller.signal,
+        });
+        if (controller.signal.aborted) return;
+        setResult({
+          key,
+          request: authenticatedRequest,
+          error: null,
+          timeSlots: response.timeSlots.map((slot) => ({
+            id: slot.startsAt,
+            startsAt: slot.startsAt,
+            label: timeFormatter.format(new Date(slot.startsAt)),
+            isAvailable: slot.available,
+          })),
+        });
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        setResult({
+          key,
+          request: authenticatedRequest,
+          timeSlots: [],
+          error:
+            error instanceof Error
+              ? error
+              : new Error("Unable to load availability"),
+        });
       }
     }
-
-    const timeoutId = setTimeout(() => {
-      void loadAvailability();
-    }, 150);
-
+    const timer = setTimeout(() => void load(), 150);
     return () => {
-      clearTimeout(timeoutId);
-      abortController.abort();
+      clearTimeout(timer);
+      controller.abort();
     };
- }, [serviceId, date, appointmentId, authenticatedRequest]);
+  }, [key, enabled, serviceId, date, appointmentId, authenticatedRequest]);
 
+  // Hide old slots immediately during render, before effect cleanup runs.
+  const current =
+    enabled && result?.key === key && result.request === authenticatedRequest
+      ? result
+      : null;
   return {
-    timeSlots,
-    isLoading,
-    error,
+    timeSlots: current?.timeSlots ?? [],
+    isLoading: enabled && !current,
+    error: current?.error ?? null,
+    refreshAvailability,
   };
 }

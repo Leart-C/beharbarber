@@ -11,29 +11,22 @@ function normalizeParameter(
 }
 
 export default function BookingRoute() {
-  const {
-    serviceId,
-    appointmentId,
-    mode,
-  } = useLocalSearchParams<{
+  const { serviceId, appointmentId, mode } = useLocalSearchParams<{
     serviceId?: string | string[];
     appointmentId?: string | string[];
     mode?: string | string[];
   }>();
 
-  const normalizedServiceId =
-    normalizeParameter(serviceId) ?? "";
+  const normalizedServiceId = normalizeParameter(serviceId) ?? "";
 
-  const normalizedAppointmentId =
-    normalizeParameter(appointmentId);
+  const normalizedAppointmentId = normalizeParameter(appointmentId);
 
   const normalizedMode: BookingMode =
-    normalizeParameter(mode) === "reschedule"
-      ? "reschedule"
-      : "create";
+    normalizeParameter(mode) === "reschedule" ? "reschedule" : "create";
 
   return (
     <BookingScreen
+      key={`${normalizedServiceId}:${normalizedAppointmentId ?? ""}:${normalizedMode}`}
       serviceId={normalizedServiceId}
       appointmentId={normalizedAppointmentId}
       mode={normalizedMode}

@@ -1,106 +1,63 @@
-import type { BookingDate } from "../types/booking-date";
+import { SHOP_TIME_ZONE } from "@/config/shop";
 import type { AppLanguage } from "@/features/localization/types/app-language";
+import type { BookingDate } from "../types/booking-date";
 
-function createDateId(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(
-    date.getMonth() + 1,
-  ).padStart(2, "0");
-  const day = String(
-    date.getDate(),
-  ).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
-}
-
-function capitalizeFirst(value: string): string {
-  if (!value) {
-    return value;
-  }
-
-  return (
-    value.charAt(0).toUpperCase() +
-    value.slice(1)
-  );
-}
+const capitalize = (value: string) =>
+  value.charAt(0).toUpperCase() + value.slice(1);
 
 export function createBookingDates(
   workingDays: number[],
   numberOfDays = 7,
   language: AppLanguage = "sq",
+  now = new Date(),
 ): BookingDate[] {
-  if (
-    workingDays.length === 0 ||
-    numberOfDays <= 0
-  ) {
+  const days = new Set(
+    workingDays.filter((day) => Number.isInteger(day) && day >= 0 && day <= 6),
+  );
+  if (!days.size || !Number.isFinite(numberOfDays) || numberOfDays <= 0)
     return [];
-  }
 
-  const workingDaySet =
-    new Set(workingDays);
-
-  const today = new Date();
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: SHOP_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(now);
+  const part = (type: string) =>
+    parts.find((item) => item.type === type)!.value;
+  const todayId = `${part("year")}-${part("month")}-${part("day")}`;
+  // Calendar dates are represented at UTC noon, avoiding device DST arithmetic.
+  const today = new Date(`${todayId}T12:00:00Z`);
   const locale = language === "sq" ? "sq-AL" : "en-US";
-  today.setHours(12, 0, 0, 0);
+  const weekday = new Intl.DateTimeFormat(locale, {
+    weekday: "long",
+    timeZone: "UTC",
+  });
+  const month = new Intl.DateTimeFormat(locale, {
+    month: "long",
+    timeZone: "UTC",
+  });
+  const dates: BookingDate[] = [];
 
-  const bookingDates: BookingDate[] = [];
-  let dayOffset = 0;
-
-  while (
-    bookingDates.length < numberOfDays &&
-    dayOffset < 366
+  for (
+    let offset = 0;
+    dates.length < Math.floor(numberOfDays) && offset < 366;
+    offset++
   ) {
     const date = new Date(today);
-    date.setDate(
-      today.getDate() + dayOffset,
-    );
-
-    dayOffset += 1;
-
-    if (
-      !workingDaySet.has(date.getDay())
-    ) {
-      continue;
-    }
-
-    const weekdayLabel = capitalizeFirst(
-      new Intl.DateTimeFormat(locale, {
-        weekday: "long",
-      }).format(date),
-    );
-
-    bookingDates.push({
-      id: createDateId(date),
+    date.setUTCDate(today.getUTCDate() + offset);
+    if (!days.has(date.getUTCDay())) continue;
+    const id = date.toISOString().slice(0, 10);
+    const weekdayLabel = capitalize(weekday.format(date));
+    dates.push({
+      id,
       date,
       weekdayLabel,
-      compactWeekdayLabel:
-        capitalizeFirst(
-          weekdayLabel.replace(
-            /^E\s+/i,
-            "",
-          ),
-        ),
-      dayLabel:
-        new Intl.DateTimeFormat(
-          locale,
-          {
-            day: "numeric",
-          },
-        ).format(date),
-      monthLabel:
-        capitalizeFirst(
-          new Intl.DateTimeFormat(
-            locale,
-            {
-              month: "long",
-            },
-          ).format(date),
-        ),
-      isToday:
-        date.getTime() ===
-        today.getTime(),
+      compactWeekdayLabel: capitalize(weekdayLabel.replace(/^E\s+/i, "")),
+      dayLabel: String(date.getUTCDate()),
+      monthLabel: capitalize(month.format(date)),
+      isToday: id === todayId,
     });
   }
-
-  return bookingDates;
+  return dates;
 }

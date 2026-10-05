@@ -1,14 +1,13 @@
+import { useAuth } from "@clerk/expo";
 import {
   createContext,
   useCallback,
-  useEffect,
   useMemo,
+  useRef,
   useState,
+  type PropsWithChildren,
 } from "react";
-import type { PropsWithChildren } from "react";
-
 import { useAuthenticatedApi } from "@/hooks/use-authenticated-api";
-
 import { cancelAppointment as cancelAppointmentRequest } from "../api/cancel-appointment";
 import { useRemoteAppointments } from "../hooks/use-remote-appointments";
 import type { Appointment } from "../types/appointment";
@@ -29,81 +28,54 @@ export const AppointmentContext = createContext<
   AppointmentsContextValue | undefined
 >(undefined);
 
-export function AppointmentsProvider({
-  children,
-}: PropsWithChildren) {
-  const { authenticatedRequest } = useAuthenticatedApi();
+export function AppointmentsProvider({ children }: PropsWithChildren) {
+  const { sessionId } = useAuth();
+  // Clear private state and invalidate old requests when accounts change.
+  return (
+    <SessionAppointmentsProvider key={sessionId ?? "signed-out"}>
+      {children}
+    </SessionAppointmentsProvider>
+  );
+}
 
+function SessionAppointmentsProvider({ children }: PropsWithChildren) {
+  const { authenticatedRequest } = useAuthenticatedApi();
   const {
-    appointments: remoteAppointments,
+    appointments,
     isLoading,
     error,
     refreshAppointments,
+    upsertAppointment,
+    removeAppointment,
   } = useRemoteAppointments();
-
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [cancellingAppointmentId, setCancellingAppointmentId] =
-    useState<string | null>(null);
-
-  useEffect(() => {
-    if (!isLoading && !error) {
-      setAppointments(remoteAppointments);
-    }
-  }, [remoteAppointments, isLoading, error]);
-
-  const addAppointment = useCallback((appointment: Appointment) => {
-    setAppointments((currentAppointments) => [
-      appointment,
-      ...currentAppointments.filter(
-        (currentAppointment) =>
-          currentAppointment.id !== appointment.id,
-      ),
-    ]);
-  }, []);
-
-  const updateAppointment = useCallback(
-    (updatedAppointment: Appointment) => {
-      setAppointments((currentAppointments) =>
-        currentAppointments.map((appointment) =>
-          appointment.id === updatedAppointment.id
-            ? updatedAppointment
-            : appointment,
-        ),
-      );
-    },
-    [],
-  );
-
-  const removeAppointment = useCallback((appointmentId: string) => {
-    setAppointments((currentAppointments) =>
-      currentAppointments.filter(
-        (appointment) => appointment.id !== appointmentId,
-      ),
-    );
-  }, []);
+  const [cancellingAppointmentId, setCancellingAppointmentId] = useState<
+    string | null
+  >(null);
+  const cancellation = useRef<Promise<void> | null>(null);
 
   const cancelAppointment = useCallback(
-    async (appointmentId: string) => {
-      setCancellingAppointmentId(appointmentId);
-
-      try {
-        await cancelAppointmentRequest({
-          authenticatedRequest,
-          appointmentId,
-        });
-
-        setAppointments((currentAppointments) =>
-          currentAppointments.filter(
-            (appointment) => appointment.id !== appointmentId,
-          ),
+    (appointmentId: string) => {
+      if (cancellation.current)
+        return Promise.reject(
+          new Error("A cancellation is already in progress"),
         );
-
-        refreshAppointments();
-      } finally {
-        setCancellingAppointmentId(null);
-      }
+      setCancellingAppointmentId(appointmentId);
+      const request = cancelAppointmentRequest({
+        authenticatedRequest,
+        appointmentId,
+      })
+        .then(() => {
+          removeAppointment(appointmentId);
+          refreshAppointments();
+        })
+        .finally(() => {
+          cancellation.current = null;
+          setCancellingAppointmentId(null);
+        });
+      cancellation.current = request;
+      return request;
     },
-    [authenticatedRequest, refreshAppointments],
+    [authenticatedRequest, removeAppointment, refreshAppointments],
   );
 
   const value = useMemo(
@@ -112,8 +84,8 @@ export function AppointmentsProvider({
       isLoading,
       error,
       cancellingAppointmentId,
-      addAppointment,
-      updateAppointment,
+      addAppointment: upsertAppointment,
+      updateAppointment: upsertAppointment,
       removeAppointment,
       cancelAppointment,
       refreshAppointments,
@@ -123,8 +95,7 @@ export function AppointmentsProvider({
       isLoading,
       error,
       cancellingAppointmentId,
-      addAppointment,
-      updateAppointment,
+      upsertAppointment,
       removeAppointment,
       cancelAppointment,
       refreshAppointments,

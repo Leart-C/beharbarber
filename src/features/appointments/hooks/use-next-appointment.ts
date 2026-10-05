@@ -1,18 +1,17 @@
-import { useMemo } from "react";
+import { useCurrentTime } from "@/hooks/use-current-time";
 import { useAppointments } from "./use-appointments";
 
-export function useNextAppointment(){
-    const {appointments} = useAppointments();
-
-    return useMemo(()=>{
-        const currentTime = Date.now();
-
-        const upcomingAppointments = appointments.filter((appointment) => new Date(appointment.startsAt).getTime() >= currentTime)
-        .sort(
-            (first,second) =>
-                new Date(first.startsAt).getTime() - new Date(second.startsAt).getTime(),
-        );
-
-        return upcomingAppointments[0];
-    },[appointments]);
+export function useNextAppointment() {
+  const { appointments } = useAppointments();
+  const now = useCurrentTime();
+  // Linear search; never sort or mutate the shared list.
+  return appointments.reduce<(typeof appointments)[number] | undefined>(
+    (next, item) => {
+      const startsAt = Date.parse(item.startsAt);
+      return startsAt >= now && (!next || startsAt < Date.parse(next.startsAt))
+        ? item
+        : next;
+    },
+    undefined,
+  );
 }

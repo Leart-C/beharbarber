@@ -12,10 +12,10 @@ export function useBusinessSettings() {
   const [error, setError] = useState<Error | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
-const refreshBusinessSettings = useCallback(() => {
+  const refreshBusinessSettings = useCallback(() => {
     setIsLoading(true);
     setRefreshKey((currentKey) => currentKey + 1);
-}, []);
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -44,9 +44,7 @@ const refreshBusinessSettings = useCallback(() => {
           setError(
             requestError instanceof Error
               ? requestError
-              : new Error(
-                  "An unknown business settings error occurred.",
-                ),
+              : new Error("An unknown business settings error occurred."),
           );
         })
         .finally(() => {
@@ -58,6 +56,8 @@ const refreshBusinessSettings = useCallback(() => {
       return () => {
         abortController.abort();
       };
+      // This revision deliberately restarts the focus subscription on manual retry.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [refreshKey]),
   );
 

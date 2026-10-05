@@ -1,118 +1,90 @@
-import {
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
-
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuthenticatedApi } from "@/hooks/use-authenticated-api";
-
 import { getAppointments } from "../api/get-appointments";
+import { mapAppointment } from "../mappers/map-appointment";
 import type { Appointment } from "../types/appointment";
 
+// Owned by the session-keyed provider. A session change creates a fresh cache.
 export function useRemoteAppointments() {
-  const {
-    authenticatedRequest,
-    isAuthLoaded,
-    isSignedIn,
-  } = useAuthenticatedApi();
-
+  const { authenticatedRequest, isAuthLoaded, isSignedIn } =
+    useAuthenticatedApi();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const activeRequest = useRef<AbortController | null>(null);
 
   const refreshAppointments = useCallback(() => {
-    setRefreshKey((currentKey) => currentKey + 1);
+    activeRequest.current?.abort();
+    setIsLoading(true);
+    setRefreshKey((key) => key + 1);
+  }, []);
+
+  // A response started before a successful mutation must never undo it.
+  const upsertAppointment = useCallback((appointment: Appointment) => {
+    activeRequest.current?.abort();
+    setIsLoading(false);
+    setError(null);
+    setAppointments((current) => [
+      appointment,
+      ...current.filter((item) => item.id !== appointment.id),
+    ]);
+    // Reload after the commit so an interrupted initial GET does not lose other bookings.
+    setRefreshKey((key) => key + 1);
+  }, []);
+
+  const removeAppointment = useCallback((id: string) => {
+    activeRequest.current?.abort();
+    setIsLoading(false);
+    setError(null);
+    setAppointments((current) => current.filter((item) => item.id !== id));
   }, []);
 
   useEffect(() => {
-    const abortController = new AbortController();
+    if (!isAuthLoaded || !isSignedIn) return;
+    const controller = new AbortController();
+    activeRequest.current = controller;
 
-    if (!isAuthLoaded) {
-      return () => {
-        abortController.abort();
-      };
-    }
-
-    if (!isSignedIn) {
-      setAppointments([]);
-      setError(null);
-      setIsLoading(false);
-
-      return () => {
-        abortController.abort();
-      };
-    }
-
-    async function loadAppointments() {
+    async function load() {
       try {
-        setIsLoading(true);
-        setError(null);
-
         const response = await getAppointments({
           authenticatedRequest,
-          signal: abortController.signal,
+          signal: controller.signal,
         });
-
-        const currentTime = Date.now();
-
-        const mappedAppointments = response.appointments
-          .filter(
-            (appointment) =>
-              appointment.status === "confirmed" &&
-              new Date(appointment.startsAt).getTime() >= currentTime,
-          )
-          .map(
-            (appointment): Appointment => ({
-              id: appointment.id,
-              serviceId:appointment.serviceId,
-              startsAt: appointment.startsAt,
-              serviceName: appointment.serviceName,
-              durationMinutes: appointment.durationMinutes,
-              price: appointment.priceCents / 100,
-              currency: appointment.currency,
-            }),
-          );
-
-        setAppointments(mappedAppointments);
-      } catch (requestError) {
-        if (
-          requestError instanceof Error &&
-          requestError.name === "AbortError"
-        ) {
-          return;
-        }
-
-        setError(
-          requestError instanceof Error
-            ? requestError
-            : new Error(
-                "An unknown appointments error occurred.",
-              ),
+        if (controller.signal.aborted) return;
+        const now = Date.now();
+        setAppointments(
+          response.appointments
+            .filter(
+              (item) =>
+                item.status === "confirmed" && Date.parse(item.startsAt) >= now,
+            )
+            .map(mapAppointment),
         );
-      } finally {
-        if (!abortController.signal.aborted) {
-          setIsLoading(false);
+        setError(null);
+      } catch (error) {
+        if (!controller.signal.aborted) {
+          setError(
+            error instanceof Error
+              ? error
+              : new Error("Unable to load appointments"),
+          );
         }
+      } finally {
+        if (!controller.signal.aborted) setIsLoading(false);
       }
     }
 
-    void loadAppointments();
-
-    return () => {
-      abortController.abort();
-    };
-  }, [
-    authenticatedRequest,
-    isAuthLoaded,
-    isSignedIn,
-    refreshKey,
-  ]);
+    void load();
+    return () => controller.abort();
+  }, [authenticatedRequest, isAuthLoaded, isSignedIn, refreshKey]);
 
   return {
-    appointments,
-    isLoading,
-    error,
+    appointments: isSignedIn ? appointments : [],
+    isLoading: !isAuthLoaded || (Boolean(isSignedIn) && isLoading),
+    error: isSignedIn ? error : null,
     refreshAppointments,
+    upsertAppointment,
+    removeAppointment,
   };
 }

@@ -2,7 +2,7 @@ import { StyleSheet } from "react-native";
 
 import { brandColors } from "@/theme/colors";
 import { fontFamily } from "@/theme/fonts";
-import { radius, spacing } from "@/theme/spacing";
+import { spacing } from "@/theme/spacing";
 
 export const styles = StyleSheet.create({
   heading: {
