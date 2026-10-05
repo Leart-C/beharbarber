@@ -3,6 +3,13 @@ import { useAvailability } from "../use-availability";
 import type { AuthenticatedRequest } from "@/hooks/use-authenticated-api";
 import { deferred } from "@/test-support/deferred";
 
+jest.mock("expo-router", () => ({
+  useFocusEffect: (effect: () => void) =>
+    jest
+      .requireActual<typeof import("react")>("react")
+      .useEffect(effect, [effect]),
+}));
+
 beforeEach(() => jest.useFakeTimers());
 afterEach(() => jest.useRealTimers());
 
@@ -40,11 +47,9 @@ it("hides previous slots immediately and rejects out-of-order responses", async 
 });
 
 it("invalidates visible slots on refresh and aborts pending work on unmount", async () => {
-  const request = jest
-    .fn()
-    .mockResolvedValue({
-      timeSlots: [{ startsAt: "2030-08-13T09:00:00Z", available: true }],
-    });
+  const request = jest.fn().mockResolvedValue({
+    timeSlots: [{ startsAt: "2030-08-13T09:00:00Z", available: true }],
+  });
   const { result, unmount } = await renderHook(() =>
     useAvailability({
       serviceId: "service-1",
@@ -59,4 +64,23 @@ it("invalidates visible slots on refresh and aborts pending work on unmount", as
   expect(result.current.isLoading).toBe(true);
   await unmount();
   expect(request.mock.calls[0][1].signal.aborted).toBe(true);
+});
+
+it("updates a selected day's slots after an admin blocks a time", async () => {
+  const slot = { startsAt: "2030-08-13T09:00:00Z", available: true };
+  const request = jest
+    .fn()
+    .mockResolvedValueOnce({ timeSlots: [slot] })
+    .mockResolvedValue({ timeSlots: [{ ...slot, available: false }] });
+  const { result } = await renderHook(() =>
+    useAvailability({
+      serviceId: "service-1",
+      date: "2030-08-13",
+      authenticatedRequest: request,
+    }),
+  );
+  await act(() => jest.advanceTimersByTime(150));
+  expect(result.current.timeSlots[0].isAvailable).toBe(true);
+  await act(() => jest.advanceTimersByTime(15_000));
+  expect(result.current.timeSlots[0].isAvailable).toBe(false);
 });

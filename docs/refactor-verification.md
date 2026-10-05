@@ -1,5 +1,7 @@
 # Booking refactor: verification and remaining work
 
+For the later admin/customer synchronization pass, see [admin-sync-verification.md](admin-sync-verification.md).
+
 This is a focused booking/session reliability pass, not a complete security audit
 or a claim that the app is ready for store release.
 
@@ -97,7 +99,7 @@ Use development/test data, not real customer appointments.
 - Add rate limiting/abuse controls and production monitoring at the API boundary.
 - This pass does not add durable idempotency keys. A duplicate-tap lock handles local
   repeated taps, not every retry after a lost network response.
-- Review the remaining feature hooks for foreground/focus revalidation, especially
-  when staff change data while the customer app stays open.
+- Foreground/focus revalidation was subsequently added; see the synchronization
+  report for coverage and the remaining integration checks.
 
 No database migrations or live appointment mutations are required by this refactor.

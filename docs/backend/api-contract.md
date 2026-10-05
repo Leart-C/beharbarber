@@ -1,119 +1,74 @@
-# API Contract
+# API contract
 
-## Authentication
+The sibling `beharbarber-admin` project serves these routes under `/api/v1`.
+The Expo API URL is the host, without this prefix. Both apps use the shop timezone
+`Europe/Belgrade`; API timestamps include a UTC offset and prices are integer cents.
 
-Authenticated requests include a Clerk session token:
+## Customer and public HTTP routes
 
-Authorization: Bearer <clerk-token>
+| Method and path | Input | Response / access |
+| --- | --- | --- |
+| `GET /services` | None | Active categories with nested active services; public |
+| `GET /schedule` | None | `{ workingDays: number[] }`, Sunday = 0; public |
+| `GET /business` | None | `{ business }` public contact/settings fields; public |
+| `GET /announcements/current` | None | `{ announcement }`, nullable; active and within its display dates; public |
+| `GET /availability` | `serviceId`, `date` (`YYYY-MM-DD`), optional `appointmentId` | `{ date, timeSlots: [{ startsAt, available }] }` |
+| `GET /me` | Clerk Bearer token | Current customer profile |
+| `GET /appointments` | Clerk Bearer token | `{ appointments }`, only the authenticated customer's records |
+| `POST /appointments` | `{ serviceId, startsAt }`, Clerk Bearer token | `201 { appointment }` |
+| `PATCH /appointments/:appointmentId` | `{ startsAt }`, Clerk Bearer token | `{ appointment }`; reschedules an owned future confirmed booking |
+| `PATCH /appointments/:appointmentId/cancel` | Clerk Bearer token | `{ appointment: { id, status, cancelledAt } }` |
 
-The backend verifies this token and reads the Clerk user ID.
+Creation availability is public. When `appointmentId` is supplied, availability
+requires authentication and ownership, excludes that booking from conflicts, and
+uses its saved duration and buffer. Rescheduling preserves the booking's service
+name, price, duration, and buffer rather than adopting edited catalogue values.
+Inactive services cannot be booked or rescheduled.
 
-The client must never send a user ID and ask the server to trust it.
+The server derives customer identity from Clerk and calculates price, duration,
+end time, and occupied end time. It never trusts those values from the client.
+Expected failures include `400` for invalid input, `401` for missing authentication,
+`404` for missing/inaccessible resources, and `409` for booking conflicts.
 
-## Customer endpoints
+## Admin interface
 
-### GET /v1/services
+Services, appointment statuses, blocked times, announcements, working hours, and
+business settings are managed through **Next.js Server Actions**, not the
+previously documented `/admin/services` or `/admin/appointments` HTTP endpoints.
+Their server functions call `requireAdmin`, which accepts `admin` and `barber` roles.
 
-Returns active categories and services.
+The admin notification HTTP endpoint is:
 
-### GET /v1/availability
+- `GET /admin/notifications/appointments`: `{ unreadCount }` for new customer bookings.
+- `POST /admin/notifications/appointments`: mark bookings seen; `204` response.
 
-Query parameters:
+Both require staff authorization. Cancellation and rescheduling are not counted
+as new-booking notifications; the open dashboard, appointments, and customer views
+refresh independently to pick up these changes.
 
-- serviceId
-- date
+## Synchronization behavior
 
-Example:
+Customer screen queries refresh on focus, foreground return, and every 15 seconds
+while focused and active. The shared appointment cache polls once per signed-in
+session while active. Backgrounding and screen cleanup abort obsolete reads;
+mutation responses invalidate older appointment reads.
 
-GET /v1/availability?serviceId=service-id&date=2026-08-05
+Admin dashboard, appointment, and customer views refresh every 15 seconds while
+visible, plus when returning to the tab or reconnecting. A refresh in progress
+pauses the next timer. Form pages preserve local drafts. Staff status changes also
+invalidate dashboard and customer history paths.
 
-Response:
+This is polling, so changes are eventually visible after a successful refresh,
+not delivered instantly. Network failures can extend that delay. Server mutation
+checks remain authoritative even if a displayed slot is stale.
 
-{
-  "date": "2026-08-05",
-  "timeSlots": [
-    {
-      "startsAt": "2026-08-05T09:00:00+02:00",
-      "available": true
-    }
-  ]
-}
+## Database guarantees and limitations
 
-### GET /v1/appointments
+Status changes and their history events are written atomically. The update checks
+confirmed status, customer ownership when applicable, the observed start time, and
+the current database time. A concurrent reschedule or status change causes a conflict.
 
-Returns appointments belonging to the signed-in customer.
-
-The customer ID comes from the verified Clerk token.
-
-### POST /v1/appointments
-
-Request:
-
-{
-  "serviceId": "service-id",
-  "startsAt": "2026-08-05T09:00:00+02:00"
-}
-
-The client does not send:
-
-- price
-- duration
-- customer ID
-- end time
-- availability
-
-The backend calculates and validates those values.
-
-Responses:
-
-- 201: appointment created
-- 400: invalid request
-- 401: not authenticated
-- 404: service not found
-- 409: time is no longer available
-
-### PATCH /v1/appointments/:appointmentId/cancel
-
-Cancels an appointment without deleting its historical record.
-
-A customer may only cancel their own appointment.
-
-## Public endpoints
-
-### GET /v1/announcements/current
-
-Returns the currently active barber announcement.
-
-## Admin endpoints
-
-### GET /v1/admin/appointments
-
-Returns appointments for the admin dashboard.
-
-### POST /v1/admin/services
-
-Creates a service.
-
-### PATCH /v1/admin/services/:serviceId
-
-Updates a service.
-
-### PATCH /v1/admin/appointments/:appointmentId
-
-Updates appointment status or schedule.
-
-### POST /v1/admin/blocked-times
-
-Blocks time from being booked.
-
-### POST /v1/admin/announcements
-
-Creates or updates the current announcement.
-
-## Security rules
-
-- All admin endpoints verify the user has the admin or barber role.
-- The Neon connection string exists only on the server.
-- The backend validates every request.
-- The backend checks availability again inside the booking operation.
-- Client-provided prices and durations are never trusted.
+The confirmed-appointment exclusion constraint must be applied in the deployed
+database to prevent concurrent double booking. Working-hours and blocked-time
+changes currently use separate preflight checks: cross-table races with booking
+creation still require database-level coordination and integration testing.

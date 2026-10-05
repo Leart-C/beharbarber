@@ -1,4 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
+import { useFocusEffect } from "expo-router";
+import { startAppPolling } from "@/lib/sync/start-app-polling";
 import { SHOP_TIME_ZONE } from "@/config/shop";
 import type { AuthenticatedRequest } from "@/hooks/use-authenticated-api";
 import { getAvailability } from "../api/get-availability";
@@ -38,49 +40,45 @@ export function useAvailability({
   const key = JSON.stringify([serviceId, date, appointmentId, revision]);
   const enabled = Boolean(serviceId && date);
 
-  useEffect(() => {
-    if (!enabled) return;
-    const controller = new AbortController();
-    async function load() {
-      try {
-        const response = await getAvailability({
-          serviceId,
-          date,
-          appointmentId,
-          authenticatedRequest,
-          signal: controller.signal,
-        });
-        if (controller.signal.aborted) return;
-        setResult({
-          key,
-          request: authenticatedRequest,
-          error: null,
-          timeSlots: response.timeSlots.map((slot) => ({
-            id: slot.startsAt,
-            startsAt: slot.startsAt,
-            label: timeFormatter.format(new Date(slot.startsAt)),
-            isAvailable: slot.available,
-          })),
-        });
-      } catch (error) {
-        if (controller.signal.aborted) return;
-        setResult({
-          key,
-          request: authenticatedRequest,
-          timeSlots: [],
-          error:
-            error instanceof Error
-              ? error
-              : new Error("Unable to load availability"),
-        });
-      }
-    }
-    const timer = setTimeout(() => void load(), 150);
-    return () => {
-      clearTimeout(timer);
-      controller.abort();
-    };
-  }, [key, enabled, serviceId, date, appointmentId, authenticatedRequest]);
+  useFocusEffect(
+    useCallback(() => {
+      if (!enabled) return;
+      return startAppPolling(async (controller) => {
+        try {
+          const response = await getAvailability({
+            serviceId,
+            date,
+            appointmentId,
+            authenticatedRequest,
+            signal: controller.signal,
+          });
+          if (controller.signal.aborted) return;
+          setResult({
+            key,
+            request: authenticatedRequest,
+            error: null,
+            timeSlots: response.timeSlots.map((slot) => ({
+              id: slot.startsAt,
+              startsAt: slot.startsAt,
+              label: timeFormatter.format(new Date(slot.startsAt)),
+              isAvailable: slot.available,
+            })),
+          });
+        } catch (error) {
+          if (controller.signal.aborted) return;
+          setResult({
+            key,
+            request: authenticatedRequest,
+            timeSlots: [],
+            error:
+              error instanceof Error
+                ? error
+                : new Error("Unable to load availability"),
+          });
+        }
+      }, 150);
+    }, [key, enabled, serviceId, date, appointmentId, authenticatedRequest]),
+  );
 
   // Hide old slots immediately during render, before effect cleanup runs.
   const current =

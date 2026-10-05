@@ -40,6 +40,15 @@ The provider remounts its subtree when the Clerk session changes to clear privat
 Requests started before a successful mutation are invalidated. An upsert starts a fresh
 background read so other appointments are not lost if the first read was interrupted.
 
+## Refresh lifecycle
+
+`hooks/use-focused-query.ts` owns the shared screen query lifecycle for services,
+shop settings, announcements, and working days. `lib/sync/start-app-polling.ts`
+allows one request at a time, pauses and aborts when backgrounded, refreshes on
+foreground return, and polls at 15-second intervals. Screen queries and availability
+stop on blur; the appointment provider owns a single poller for the signed-in session.
+Keep read functions stable so renders do not restart the subscription.
+
 ## Backend companion project
 
 The sibling `beharbarber-admin` project owns the database and authorization.

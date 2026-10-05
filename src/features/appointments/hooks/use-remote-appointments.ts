@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuthenticatedApi } from "@/hooks/use-authenticated-api";
+import { startAppPolling } from "@/lib/sync/start-app-polling";
 import { getAppointments } from "../api/get-appointments";
 import { mapAppointment } from "../mappers/map-appointment";
 import type { Appointment } from "../types/appointment";
@@ -42,10 +43,8 @@ export function useRemoteAppointments() {
 
   useEffect(() => {
     if (!isAuthLoaded || !isSignedIn) return;
-    const controller = new AbortController();
-    activeRequest.current = controller;
-
-    async function load() {
+    return startAppPolling(async (controller) => {
+      activeRequest.current = controller;
       try {
         const response = await getAppointments({
           authenticatedRequest,
@@ -73,10 +72,7 @@ export function useRemoteAppointments() {
       } finally {
         if (!controller.signal.aborted) setIsLoading(false);
       }
-    }
-
-    void load();
-    return () => controller.abort();
+    });
   }, [authenticatedRequest, isAuthLoaded, isSignedIn, refreshKey]);
 
   return {

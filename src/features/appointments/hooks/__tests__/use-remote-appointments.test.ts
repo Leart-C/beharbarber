@@ -72,3 +72,21 @@ it("filters terminal and past appointments and maps prices once", async () => {
   ]);
   expect(result.current.appointments[0].price).toBe(7);
 });
+
+it("picks up an admin cancellation while the app remains open", async () => {
+  jest.useFakeTimers();
+  try {
+    mockRequest
+      .mockResolvedValueOnce({ appointments: [remoteAppointment] })
+      .mockResolvedValue({
+        appointments: [{ ...remoteAppointment, status: "cancelled" }],
+      });
+    const { result, unmount } = await renderHook(useRemoteAppointments);
+    expect(result.current.appointments).toHaveLength(1);
+    await act(() => jest.advanceTimersByTime(15_000));
+    expect(result.current.appointments).toEqual([]);
+    await unmount();
+  } finally {
+    jest.useRealTimers();
+  }
+});
