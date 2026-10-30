@@ -62,6 +62,21 @@ export const styles = StyleSheet.create({
     lineHeight: 21,
   },
 
+  deleteAccountButton: {
+    alignSelf: "center",
+    minHeight: 44,
+    paddingHorizontal: spacing.lg,
+    justifyContent: "center",
+  },
+
+  deleteAccountButtonText: {
+    color: "rgba(255, 255, 255, 0.5)",
+    fontFamily: fontFamily.semiBold,
+    fontSize: 14,
+    lineHeight: 20,
+    textDecorationLine: "underline",
+  },
+
   buttonPressed: {
     opacity: 0.72,
     transform: [{ scale: 0.985 }],

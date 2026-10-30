@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "beharbarber",
+    "name": "Behar Barber",
     "slug": "beharbarber",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -9,7 +9,12 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon",
-      "bundleIdentifier": "com.anonymous.beharbarber"
+      "bundleIdentifier": "com.leartbajrami.beharbarber",
+      "usesAppleSignIn": true,
+      "supportsTablet": false,
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -37,11 +42,17 @@
       [
         "@clerk/expo",
         {
-          "appleSignIn": false
+          "appleSignIn": true
         }
       ],
-      "expo-secure-store",
-      "expo-notifications"
+      [
+        "expo-secure-store",
+        {
+          "faceIDPermission": false
+        }
+      ],
+      "expo-notifications",
+      "expo-apple-authentication"
     ],
     "experiments": {
       "typedRoutes": true,

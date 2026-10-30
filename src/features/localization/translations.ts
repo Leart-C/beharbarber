@@ -21,9 +21,12 @@ export const translations = {
       description:
         "Rezervo termin për 30 sekonda — pa telefonata, pa pritje.",
       google: "Vazhdo me Google",
+      apple: "Vazhdo me Apple",
       attribution: "Sign in from",
       googleError:
         "Hyrja me Google dështoi. Provo përsëri.",
+      appleError:
+        "Hyrja me Apple dështoi. Provo përsëri.",
     },
     home: {
       greeting: "Përshëndetje,",
@@ -115,6 +118,13 @@ export const translations = {
       description:
         "Menaxho llogarinë dhe preferencat.",
       signOut: "Dil nga llogaria",
+      deleteAccount: "Fshi llogarinë",
+      deleteAccountTitle: "Të fshihet llogaria?",
+      deleteAccountMessage:
+        "Llogaria jote dhe të dhënat personale do të fshihen përgjithmonë. Terminet e ardhshme do të anulohen. Ky veprim nuk mund të kthehet.",
+      deleteAccountConfirm: "Fshi",
+      deleteAccountFailed:
+        "Llogaria nuk u fshi. Kontrollo internetin dhe provo përsëri.",
       preferences: "Preferencat",
       language: "Gjuha",
       customer: "Klienti",
@@ -171,7 +181,7 @@ export const translations = {
         "Hyrja menaxhohet përmes Clerk, ndërsa të dhënat e aplikacionit ruhen në sistemet e backend-it të Behar Barber.",
       userChoicesTitle: "Zgjedhjet e tua",
       userChoicesBody:
-        "Mund të kërkosh korrigjimin ose fshirjen e të dhënave të tua duke kontaktuar Behar Barber.",
+        "Mund ta fshish llogarinë dhe të dhënat personale në çdo kohë nga Profili → Fshi llogarinë. Për korrigjime, kontakto Behar Barber.",
       termsTitle: "Kushtet e përdorimit",
       termsDescription:
         "Rregullat bazë për përdorimin e aplikacionit dhe rezervimin e termineve.",
@@ -214,9 +224,12 @@ export const translations = {
       description:
         "Book your appointment in 30 seconds — no calls, no waiting.",
       google: "Continue with Google",
+      apple: "Continue with Apple",
       attribution: "Sign in from",
       googleError:
         "Google sign-in failed. Please try again.",
+      appleError:
+        "Apple sign-in failed. Please try again.",
     },
     home: {
       greeting: "Welcome,",
@@ -306,6 +319,13 @@ export const translations = {
       description:
         "Manage your account and preferences.",
       signOut: "Sign out",
+      deleteAccount: "Delete account",
+      deleteAccountTitle: "Delete your account?",
+      deleteAccountMessage:
+        "Your account and personal data will be permanently deleted. Upcoming appointments will be cancelled. This cannot be undone.",
+      deleteAccountConfirm: "Delete",
+      deleteAccountFailed:
+        "Your account could not be deleted. Check your connection and try again.",
       preferences: "Preferences",
       language: "Language",
       customer: "Customer",
@@ -359,7 +379,7 @@ export const translations = {
         "Authentication is managed through Clerk, while application data is stored by the Behar Barber backend systems.",
       userChoicesTitle: "Your choices",
       userChoicesBody:
-        "You may request correction or deletion of your information by contacting Behar Barber.",
+        "You can delete your account and personal data at any time from Profile → Delete account. For corrections, contact Behar Barber.",
       termsTitle: "Terms of use",
       termsDescription:
         "Basic rules for using the application and booking appointments.",

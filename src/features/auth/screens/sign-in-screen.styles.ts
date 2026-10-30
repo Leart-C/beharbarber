@@ -22,10 +22,10 @@ export const styles = StyleSheet.create({
 
   actions: {
     marginTop: spacing["2xl"],
+    gap: spacing.md,
   },
 
   errorMessage: {
-    marginTop: spacing.md,
     color: "#FFB4B8",
     fontFamily: fontFamily.medium,
     fontSize: 14,
@@ -34,7 +34,7 @@ export const styles = StyleSheet.create({
   },
 
   attribution: {
-    marginTop: spacing.xl,
+    marginTop: spacing.sm,
     color: "rgba(255,255,255,0.58)",
     fontFamily: fontFamily.semiBold,
     fontSize: 13,
